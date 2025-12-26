@@ -39,6 +39,9 @@ class EpisodeResource extends Resource
                 Forms\Components\Textarea::make('description'),
                 Forms\Components\Select::make('anime_id')
                     ->relationship('anime', 'title')
+                    ->searchable()
+                    ->preload()
+                    ->placeholder('Cari & pilih anime')
                     ->required(),
             ]);
     }

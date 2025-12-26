@@ -5,11 +5,11 @@
 <div class="max-w-7xl mx-auto px-4 py-8">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div class="lg:col-span-3">
-            <div class="rounded-2xl overflow-hidden shadow-2xl bg-black aspect-video border border-white/5">
+            <div class="rounded-2xl overflow-hidden shadow-2xl bg-black aspect-video border border-white/5 mb-8">
                 @livewire('video-player', ['episode' => $episode])
             </div>
 
-            <div class="mt-8 bg-[#1a1d24] rounded-2xl p-8 border border-white/5">
+            <div class="bg-[#1a1d24] rounded-2xl p-8 border border-white/5">
                 <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
                     <h1 class="text-3xl font-black text-white tracking-tight">
                         {{ $episode->anime->title }} <span class="text-red-600">- Ep {{ $episode->episode_number }}</span>
@@ -43,7 +43,9 @@
             </div>
             
             <div class="bg-[#1a1d24] rounded-2xl p-4 border border-white/5">
-                <img src="{{ asset('storage/' . $episode->anime->poster_image) }}" class="w-full h-40 object-cover rounded-xl mb-4 shadow-lg">
+                <img src="{{ $episode->anime->poster_image ? asset('storage/' . $episode->anime->poster_image) : asset('images/placeholder.png') }}" 
+                     alt="{{ $episode->anime->title }}"
+                     class="w-full h-40 object-cover rounded-xl mb-4 shadow-lg bg-gray-800">
                 <h4 class="text-sm font-black text-white uppercase">{{ $episode->anime->title }}</h4>
                 <div class="flex items-center gap-2 mt-2">
                     <span class="text-yellow-500 font-bold">★ {{ number_format($episode->anime->rating, 1) }}</span>

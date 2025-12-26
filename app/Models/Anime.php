@@ -45,6 +45,19 @@ class Anime extends Model
     }
 
     /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::deleting(function ($anime) {
+            $anime->episodes()->delete();
+            $anime->genres()->detach();
+        });
+    }
+
+    /**
      * Get the route key name.
      */
     public function getRouteKeyName(): string

@@ -19,17 +19,51 @@ class MyAnimeListService
     {
         $year = $year ?? date('Y');
         $season = $season ?? $this->getCurrentSeason();
-        
-        $response = Http::get("{$this->baseUrl}/seasons/{$year}/{$season}", [
-            'page' => 1,
-            'limit' => $limit,
-        ]);
+        $target = max(1, (int) $limit);
+        $perPage = 25; // Jikan seasonal endpoint effectively caps at 25
+        $page = 1;
+        $results = [];
 
-        if ($response->successful()) {
-            return $response->json()['data'] ?? [];
+        try {
+            while (count($results) < $target) {
+                $response = Http::timeout(30)
+                    ->retry(3, 1000)
+                    ->get("{$this->baseUrl}/seasons/{$year}/{$season}", [
+                        'page' => $page,
+                        'limit' => $perPage,
+                    ]);
+
+                if (!$response->successful()) {
+                    throw new \Exception("API returned status: " . $response->status());
+                }
+
+                $data = $response->json()['data'] ?? [];
+
+                if (empty($data)) {
+                    break; // no more data
+                }
+
+                foreach ($data as $item) {
+                    if (count($results) >= $target) {
+                        break 2;
+                    }
+                    $results[] = $item;
+                }
+
+                // If less than perPage returned, no next page
+                if (count($data) < $perPage) {
+                    break;
+                }
+
+                $page++;
+                usleep(400000); // 0.4s to respect Jikan rate limits
+            }
+
+            return $results;
+        } catch (\Exception $e) {
+            \Log::error("Failed to fetch seasonal anime: " . $e->getMessage());
+            throw new \Exception("Gagal mengambil data dari MyAnimeList. Pastikan koneksi internet Anda stabil dan coba lagi.");
         }
-
-        return [];
     }
 
     /**
@@ -37,16 +71,23 @@ class MyAnimeListService
      */
     public function fetchTopAnime($limit = 25)
     {
-        $response = Http::get("{$this->baseUrl}/top/anime", [
-            'page' => 1,
-            'limit' => $limit,
-        ]);
+        try {
+            $response = Http::timeout(30)
+                ->retry(3, 1000)
+                ->get("{$this->baseUrl}/top/anime", [
+                    'page' => 1,
+                    'limit' => $limit,
+                ]);
 
-        if ($response->successful()) {
-            return $response->json()['data'] ?? [];
+            if ($response->successful()) {
+                return $response->json()['data'] ?? [];
+            }
+            
+            throw new \Exception("API returned status: " . $response->status());
+        } catch (\Exception $e) {
+            \Log::error("Failed to fetch top anime: " . $e->getMessage());
+            throw new \Exception("Gagal mengambil data dari MyAnimeList. Pastikan koneksi internet Anda stabil dan coba lagi.");
         }
-
-        return [];
     }
 
     /**
@@ -54,18 +95,25 @@ class MyAnimeListService
      */
     public function searchAnime($query, $limit = 10)
     {
-        $response = Http::get("{$this->baseUrl}/anime", [
-            'q' => $query,
-            'limit' => $limit,
-            'order_by' => 'members',
-            'sort' => 'desc',
-        ]);
+        try {
+            $response = Http::timeout(30)
+                ->retry(3, 1000)
+                ->get("{$this->baseUrl}/anime", [
+                    'q' => $query,
+                    'limit' => $limit,
+                    'order_by' => 'members',
+                    'sort' => 'desc',
+                ]);
 
-        if ($response->successful()) {
-            return $response->json()['data'] ?? [];
+            if ($response->successful()) {
+                return $response->json()['data'] ?? [];
+            }
+            
+            throw new \Exception("API returned status: " . $response->status());
+        } catch (\Exception $e) {
+            \Log::error("Failed to search anime: " . $e->getMessage());
+            throw new \Exception("Gagal mencari anime. Pastikan koneksi internet Anda stabil dan coba lagi.");
         }
-
-        return [];
     }
 
     /**
@@ -73,13 +121,20 @@ class MyAnimeListService
      */
     public function getAnimeDetails($malId)
     {
-        $response = Http::get("{$this->baseUrl}/anime/{$malId}/full");
+        try {
+            $response = Http::timeout(30)
+                ->retry(3, 1000)
+                ->get("{$this->baseUrl}/anime/{$malId}/full");
 
-        if ($response->successful()) {
-            return $response->json()['data'] ?? null;
+            if ($response->successful()) {
+                return $response->json()['data'] ?? null;
+            }
+            
+            return null;
+        } catch (\Exception $e) {
+            \Log::error("Failed to get anime details: " . $e->getMessage());
+            return null;
         }
-
-        return null;
     }
 
     /**
@@ -102,12 +157,12 @@ class MyAnimeListService
         $animeData = [
             'title' => $malData['title'],
             'slug' => $slug,
-            'description' => $malData['synopsis'] ?? '',
-            'cover_image' => $imageUrl ?? $malData['images']['jpg']['large_image_url'] ?? null,
+            'synopsis' => $malData['synopsis'] ?? '',
+            'poster_image' => $imageUrl ?? null,
             'rating' => isset($malData['score']) ? round($malData['score'], 1) : null,
             'status' => $this->mapStatus($malData['status'] ?? 'Unknown'),
+            'type' => $this->mapType($malData['type'] ?? 'TV'),
             'release_year' => isset($malData['year']) ? (int)$malData['year'] : null,
-            'total_episodes' => $malData['episodes'] ?? 0,
         ];
 
         if ($anime) {
@@ -148,15 +203,15 @@ class MyAnimeListService
     protected function downloadImage($url, $slug)
     {
         try {
-            $response = Http::get($url);
+            $response = Http::timeout(30)->get($url);
             
             if ($response->successful()) {
                 $extension = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
-                $filename = "covers/{$slug}-" . time() . ".{$extension}";
+                $filename = "posters/{$slug}-" . time() . ".{$extension}";
                 
                 Storage::disk('public')->put($filename, $response->body());
                 
-                return "/storage/{$filename}";
+                return $filename;
             }
         } catch (\Exception $e) {
             // Log error but don't fail the sync
@@ -172,12 +227,28 @@ class MyAnimeListService
     protected function mapStatus($malStatus)
     {
         $statusMap = [
-            'Finished Airing' => 'completed',
-            'Currently Airing' => 'ongoing',
-            'Not yet aired' => 'upcoming',
+            'Finished Airing' => 'Completed',
+            'Currently Airing' => 'Ongoing',
+            'Not yet aired' => 'Ongoing',
         ];
 
-        return $statusMap[$malStatus] ?? 'unknown';
+        return $statusMap[$malStatus] ?? 'Ongoing';
+    }
+
+    /**
+     * Map MAL type to local type
+     */
+    protected function mapType($malType)
+    {
+        $typeMap = [
+            'TV' => 'TV',
+            'Movie' => 'Movie',
+            'OVA' => 'ONA',
+            'ONA' => 'ONA',
+            'Special' => 'ONA',
+        ];
+
+        return $typeMap[$malType] ?? 'TV';
     }
 
     /**
@@ -199,5 +270,62 @@ class MyAnimeListService
     protected function rateLimit()
     {
         usleep(350000); // 350ms delay between requests
+    }
+
+    /**
+     * Batch sync multiple anime
+     */
+    public function batchSync($animeList, $downloadImages = true)
+    {
+        $synced = [];
+        $failed = [];
+
+        foreach ($animeList as $index => $malData) {
+            try {
+                $anime = $this->syncAnime($malData, $downloadImages);
+                $synced[] = [
+                    'id' => $anime->id,
+                    'title' => $anime->title,
+                    'status' => 'success',
+                ];
+                
+                // Rate limit after each sync
+                if ($index < count($animeList) - 1) {
+                    $this->rateLimit();
+                }
+            } catch (\Exception $e) {
+                $failed[] = [
+                    'title' => $malData['title'] ?? 'Unknown',
+                    'error' => $e->getMessage(),
+                ];
+                \Log::error("Failed to sync anime: " . $e->getMessage());
+            }
+        }
+
+        return [
+            'synced' => $synced,
+            'failed' => $failed,
+            'total' => count($animeList),
+            'success_count' => count($synced),
+            'failed_count' => count($failed),
+        ];
+    }
+
+    /**
+     * Sync seasonal anime automatically
+     */
+    public function syncSeasonalAnime($year = null, $season = null, $limit = 25, $downloadImages = true)
+    {
+        $animeList = $this->fetchSeasonalAnime($year, $season, $limit);
+        return $this->batchSync($animeList, $downloadImages);
+    }
+
+    /**
+     * Sync top anime automatically
+     */
+    public function syncTopAnime($limit = 25, $downloadImages = true)
+    {
+        $animeList = $this->fetchTopAnime($limit);
+        return $this->batchSync($animeList, $downloadImages);
     }
 }

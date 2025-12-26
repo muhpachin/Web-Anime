@@ -16,4 +16,22 @@ class EditAnime extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Simpan genres untuk di-sync nanti
+        if (isset($data['genres'])) {
+            $this->genres = $data['genres'];
+            unset($data['genres']);
+        }
+        return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        // Sync genres setelah anime disimpan
+        if (isset($this->genres)) {
+            $this->record->genres()->sync($this->genres);
+        }
+    }
 }

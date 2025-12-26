@@ -36,6 +36,9 @@ class VideoServerResource extends Resource
                     ->required(),
                 Forms\Components\Select::make('episode_id')
                     ->relationship('episode', 'title')
+                    ->searchable()
+                    ->preload()
+                    ->placeholder('Cari & pilih episode')
                     ->required(),
             ]);
     }
@@ -53,7 +56,23 @@ class VideoServerResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\Action::make('duplicate')
+                    ->label('Copy')
+                    ->icon('heroicon-o-duplicate')
+                    ->color('success')
+                    ->action(function (VideoServer $record) {
+                        $newServer = $record->replicate();
+                        $newServer->server_name = $record->server_name . ' (Copy)';
+                        $newServer->save();
+                        
+                        return redirect(static::getUrl('edit', ['record' => $newServer->id]));
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Duplikasi Video Server')
+                    ->modalSubheading('Server akan dicopy dengan nama "(Copy)" di belakang')
+                    ->modalButton('Ya, Copy Server'),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

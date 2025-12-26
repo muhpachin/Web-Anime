@@ -8,7 +8,9 @@
     @if($featuredAnimes->count() > 0)
     <div class="relative h-[500px] w-full overflow-hidden group">
         <div class="absolute inset-0">
-            <img src="{{ asset('storage/' . $featuredAnimes[0]->poster_image) }}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+            <img src="{{ $featuredAnimes[0]->poster_image ? asset('storage/' . $featuredAnimes[0]->poster_image) : asset('images/placeholder.png') }}" 
+                 alt="{{ $featuredAnimes[0]->title }}"
+                 class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 bg-gray-800">
             <div class="absolute inset-0 bg-gradient-to-r from-[#0f1115] via-[#0f1115]/70 to-[#0f1115]/30"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-[#0f1115] via-transparent to-transparent"></div>
         </div>
@@ -72,8 +74,9 @@
                         <a href="{{ route('watch', $episode) }}" class="group block">
                             <div class="relative bg-[#1a1d24] rounded-2xl overflow-hidden border border-white/10 group-hover:border-red-600/50 transition-all duration-300 shadow-lg">
                                 <div class="relative aspect-[3/4] overflow-hidden">
-                                    <img src="{{ asset('storage/' . $anime->poster_image) }}" 
-                                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                    <img src="{{ $anime->poster_image ? asset('storage/' . $anime->poster_image) : asset('images/placeholder.png') }}" 
+                                         alt="{{ $anime->title }}"
+                                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 bg-gray-800">
                                     
                                     <!-- Overlay -->
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -143,7 +146,9 @@
                         @foreach($popularAnimes as $index => $anime)
                         <a href="{{ route('detail', $anime) }}" class="flex items-center gap-4 group p-3 rounded-xl hover:bg-white/5 transition-all">
                             <div class="relative flex-shrink-0">
-                                <img src="{{ asset('storage/' . $anime->poster_image) }}" class="w-16 h-24 object-cover rounded-lg shadow-lg group-hover:shadow-xl group-hover:shadow-red-600/20 transition-all">
+                                <img src="{{ $anime->poster_image ? asset('storage/' . $anime->poster_image) : asset('images/placeholder.png') }}" 
+                                     alt="{{ $anime->title }}"
+                                     class="w-16 h-24 object-cover rounded-lg shadow-lg group-hover:shadow-xl group-hover:shadow-red-600/20 transition-all bg-gray-700">
                                 <div class="absolute -top-3 -left-3 w-8 h-8 bg-gradient-to-br from-red-600 to-red-700 text-white text-xs font-black rounded-full flex items-center justify-center border-3 border-[#1a1d24] shadow-lg">
                                     {{ $index + 1 }}
                                 </div>

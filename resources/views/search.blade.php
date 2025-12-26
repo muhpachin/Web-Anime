@@ -83,9 +83,9 @@
                                 <div class="relative overflow-hidden rounded-2xl bg-[#1a1d24] border border-white/10 group-hover:border-red-600/50 transition-all duration-300">
                                     <!-- Image Container -->
                                     <div class="aspect-[3/4] overflow-hidden">
-                                        <img src="{{ asset('storage/' . $anime->poster_image) }}" 
+                                        <img src="{{ $anime->poster_image ? asset('storage/' . $anime->poster_image) : asset('images/placeholder.png') }}" 
                                              alt="{{ $anime->title }}"
-                                             class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                                             class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500 bg-gray-800">
                                         
                                         <!-- Overlay Gradient -->
                                         <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

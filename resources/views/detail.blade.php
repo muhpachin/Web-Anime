@@ -6,7 +6,9 @@
     <!-- Hero Section -->
     <div class="relative min-h-screen bg-gradient-to-b from-[#1a1d24] to-[#0f1115] overflow-hidden">
         <div class="absolute inset-0 opacity-20">
-            <img src="{{ asset('storage/' . $anime->poster_image) }}" class="w-full h-full object-cover">
+            <img src="{{ $anime->poster_image ? asset('storage/' . $anime->poster_image) : asset('images/placeholder.png') }}" 
+                 alt="{{ $anime->title }}"
+                 class="w-full h-full object-cover bg-gray-800">
             <div class="absolute inset-0 bg-gradient-to-r from-[#0f1115] via-[#0f1115]/50 to-transparent"></div>
         </div>
 
@@ -15,9 +17,9 @@
                 <!-- Poster -->
                 <div class="md:col-span-1">
                     <div class="sticky top-28">
-                        <img src="{{ asset('storage/' . $anime->poster_image) }}" 
+                        <img src="{{ $anime->poster_image ? asset('storage/' . $anime->poster_image) : asset('images/placeholder.png') }}" 
                              alt="{{ $anime->title }}"
-                             class="w-full rounded-2xl shadow-2xl shadow-black/50 border-2 border-white/10 hover:border-red-600/50 transition-all">
+                             class="w-full rounded-2xl shadow-2xl shadow-black/50 border-2 border-white/10 hover:border-red-600/50 transition-all bg-gray-800">
                         @if($anime->episodes->count() > 0)
                             <a href="{{ route('watch', $anime->episodes->first()) }}" 
                                class="mt-6 w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-red-600/30 uppercase tracking-wide">

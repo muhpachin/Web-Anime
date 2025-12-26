@@ -39,6 +39,18 @@ class Episode extends Model
     }
 
     /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::deleting(function ($episode) {
+            $episode->videoServers()->delete();
+        });
+    }
+
+    /**
      * Get the route key name.
      */
     public function getRouteKeyName(): string

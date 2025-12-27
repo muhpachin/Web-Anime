@@ -82,43 +82,98 @@ class ImportFromHtml extends Page implements Forms\Contracts\HasForms
                         ->label('File HTML')
                         ->acceptedFileTypes(['text/html', '.html', '.htm'])
                         ->directory('temp-imports')
-                        ->reactive()
-                        ->afterStateUpdated(fn () => $this->parseHtmlFile()),
-                    
-                    Forms\Components\Textarea::make('htmlContent')
-                        ->label('Atau Paste HTML Content')
-                        ->rows(5)
-                        ->placeholder('Paste HTML content di sini...')
-                        ->reactive()
-                        ->afterStateUpdated(fn () => $this->parseHtmlContent()),
-                ]),
-            
-            Forms\Components\Section::make('Opsi Import')
-                ->schema([
-                    Forms\Components\Toggle::make('scrapeEpisodes')
-                        ->label('Scrape halaman episode untuk video servers')
-                        ->helperText('Akan mengunjungi setiap link episode untuk mengambil video servers')
-                        ->default(true),
-                    
-                    Forms\Components\TextInput::make('delayBetweenRequests')
-                        ->label('Delay antar request (detik)')
-                        ->numeric()
-                        ->default(2)
-                        ->minValue(1)
-                        ->maxValue(10)
-                        ->helperText('Untuk menghindari rate limiting'),
-                ]),
-        ];
-    }
 
-    public function parseHtmlFile()
-    {
-        if (!$this->htmlFile) {
-            return;
-        }
+                        <?php
 
-        try {
-            // Mendukung single/multiple file upload (ambil file pertama jika array)
+                        namespace App\Filament\Resources\HtmlImportResource\Pages;
+
+                        use Filament\Resources\Pages\Page;
+                        use Filament\Notifications\Notification;
+                        use Livewire\WithFileUploads;
+                        use Illuminate\Support\Facades\Http;
+
+                        class ImportFromHtml extends Page
+                        {
+                            use WithFileUploads;
+
+                            public $htmlFile;
+
+                            protected static string $view = 'filament.resources.html-import-resource.pages.import-from-html';
+
+                            public function downloadAllEpisodeHtmls()
+                            {
+                                if (!$this->htmlFile) {
+                                    Notification::make()
+                                        ->title('Tidak ada file HTML')
+                                        ->danger()
+                                        ->send();
+                                    return;
+                                }
+
+                                // Ambil isi file HTML utama
+                                $content = $this->htmlFile->get();
+
+                                // Ambil semua link episode dari <ul class="daftar">
+                                preg_match('/<ul class="daftar">(.*?)<\/ul>/is', $content, $listMatch);
+                                $episodeLinks = [];
+                                if (!empty($listMatch[1])) {
+                                    preg_match_all('/<li>\s*<a href="([^"]+)"[^>]*>([^<]+)<\/a>/i', $listMatch[1], $matches, PREG_SET_ORDER);
+                                    foreach ($matches as $ep) {
+                                        $episodeLinks[] = $ep[1];
+                                    }
+                                }
+
+                                if (empty($episodeLinks)) {
+                                    Notification::make()
+                                        ->title('Tidak ada link episode ditemukan')
+                                        ->danger()
+                                        ->send();
+                                    return;
+                                }
+
+                                // Download semua HTML episode
+                                $episodeHtmls = [];
+                                foreach ($episodeLinks as $url) {
+                                    try {
+                                        $html = Http::timeout(30)
+                                            ->withHeaders([
+                                                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                                                'Accept' => 'text/html,application/xhtml+xml',
+                                            ])->get($url)->body();
+                                        $episodeHtmls[] = [
+                                            'url' => $url,
+                                            'html' => $html,
+                                        ];
+                                    } catch (\Exception $e) {
+                                        $episodeHtmls[] = [
+                                            'url' => $url,
+                                            'html' => '',
+                                            'error' => $e->getMessage(),
+                                        ];
+                                    }
+                                }
+
+                                // Buat ZIP file di storage temporary
+                                $zipPath = storage_path('app/public/episodes_html_' . time() . '.zip');
+                                $zip = new \ZipArchive();
+                                if ($zip->open($zipPath, \ZipArchive::CREATE) === TRUE) {
+                                    foreach ($episodeHtmls as $i => $ep) {
+                                        $filename = 'episode-' . ($i + 1) . '.html';
+                                        $zip->addFromString($filename, $ep['html'] ?? '');
+                                    }
+                                    $zip->close();
+                                } else {
+                                    Notification::make()
+                                        ->title('Gagal membuat ZIP')
+                                        ->danger()
+                                        ->send();
+                                    return;
+                                }
+
+                                // Download ZIP ke browser
+                                return response()->download($zipPath)->deleteFileAfterSend(true);
+                            }
+                        }
             $file = is_array($this->htmlFile) ? $this->htmlFile[0] : $this->htmlFile;
             $content = $file->get();
             $this->parseAndPreview($content);

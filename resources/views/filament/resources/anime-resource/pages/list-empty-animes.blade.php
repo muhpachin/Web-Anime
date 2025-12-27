@@ -14,19 +14,20 @@
 
                 <div class="flex gap-2">
                     {{-- Tombol Copy Judul --}}
-                    <x-filament::button 
-                        size="sm" 
-                        color="secondary" 
+                    <x-filament::button
+                        size="sm"
+                        color="secondary"
                         icon="heroicon-s-clipboard-copy"
-                        onclick="navigator.clipboard.writeText('{{ $anime->title }}'); alert('Judul disalin: {{ $anime->title }}')"
+                        {{-- Menggunakan addslashes agar judul seperti Dr. Stone tidak error --}}
+                        onclick="window.navigator.clipboard.writeText('{{ addslashes($anime->title) }}'); alert('Judul disalin: {{ addslashes($anime->title) }}')"
                     >
                         Copy Judul
                     </x-filament::button>
 
-                    {{-- Tombol Edit: Menggunakan $anime->id untuk memastikan parameter record terisi --}}
-                    <x-filament::button 
-                        size="sm" 
-                        tag="a" 
+                    {{-- Tombol Edit --}}
+                    <x-filament::button
+                        size="sm"
+                        tag="a"
                         href="{{ \App\Filament\Resources\AnimeResource::getUrl('edit', ['record' => $anime->id]) }}"
                         icon="heroicon-s-pencil"
                     >

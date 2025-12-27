@@ -340,43 +340,78 @@
             background: #b91c1c;
         }
     </style>
-    @if(isset($holidaySettings))
-    {{-- EFEK SALJU NATAL --}}
+    {{-- Tombol Toggle Efek (Muncul jika salah satu tema aktif) --}}
+@if(isset($holidaySettings) && ($holidaySettings['christmas'] || $holidaySettings['new_year']))
+    <div class="fixed bottom-5 left-5 z-[10000]">
+        <button id="toggle-holiday-effect" onclick="toggleHolidayEffect()" class="flex items-center gap-2 px-4 py-2 bg-black/50 backdrop-blur-md border border-white/20 text-white text-xs font-bold rounded-full hover:bg-red-600 transition-all shadow-lg">
+            <span id="toggle-icon">✨</span>
+            <span id="toggle-text">Matikan Efek</span>
+        </button>
+    </div>
+@endif
+
+{{-- Script Logika Efek & Kontrol User --}}
+@if(isset($holidaySettings))
+    {{-- Import Library --}}
     @if($holidaySettings['christmas'])
         <script src="https://unpkg.com/magic-snowflakes/dist/snowflakes.min.js"></script>
-        <script>new Snowflakes({ color: '#ffffff' });</script>
+    @endif
+    @if($holidaySettings['new_year'])
+        <script src="https://unpkg.com/fireworks-js@2.x/dist/index.umd.js"></script>
     @endif
 
-    @if(isset($holidaySettings) && $holidaySettings['new_year'])
-    <div id="fireworks-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></div>
+    <div id="holiday-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></div>
 
-    <script src="https://unpkg.com/fireworks-js@2.x/dist/index.umd.js"></script>
     <script>
-        const container = document.getElementById('fireworks-container');
-        const fireworks = new Fireworks.default(container, {
-            autoresize: true,
-            opacity: 0.5,
-            acceleration: 1.05,
-            friction: 0.97,
-            gravity: 1.5,
-            particles: 50,
-            traceLength: 3,
-            traceSpeed: 10,
-            explosion: 5,
-            intensity: 30, // Semakin tinggi, semakin banyak kembang api muncul di mana-mana
-            flicker: 50,
-            lineStyle: 'round',
-            hue: { min: 0, max: 360 },
-            delay: { min: 30, max: 60 },
-            rocketsPoint: { min: 50, max: 50 },
-            lineWidth: { explosion: { min: 1, max: 3 }, trace: { min: 1, max: 2 } },
-            brightness: { min: 50, max: 80 },
-            decay: { min: 0.015, max: 0.03 },
-            mouse: { click: false, move: false, max: 1 }
-        });
+        let holidayInstance = null;
+        const container = document.getElementById('holiday-container');
+        const toggleBtn = document.getElementById('toggle-holiday-effect');
+        const toggleText = document.getElementById('toggle-text');
 
-        // Jalankan Kembang Api
-        fireworks.start();
+        // 1. Fungsi untuk Menjalankan Efek
+        function startEffect() {
+            const isDisabled = localStorage.getItem('nipnime_effects_disabled') === 'true';
+            
+            if (isDisabled) {
+                if(toggleText) toggleText.innerText = "Aktifkan Efek";
+                return;
+            }
+
+            @if($holidaySettings['christmas'])
+                holidayInstance = new Snowflakes({ color: '#ffffff', container: container });
+            @elseif($holidaySettings['new_year'])
+                holidayInstance = new Fireworks.default(container, { intensity: 30, autoresize: true });
+                holidayInstance.start();
+            @endif
+
+            if(toggleText) toggleText.innerText = "Matikan Efek";
+        }
+
+        // 2. Fungsi Toggle untuk User
+        function toggleHolidayEffect() {
+            const isDisabled = localStorage.getItem('nipnime_effects_disabled') === 'true';
+            
+            if (isDisabled) {
+                // Aktifkan
+                localStorage.setItem('nipnime_effects_disabled', 'false');
+                location.reload(); // Reload untuk menjalankan instance baru
+            } else {
+                // Matikan
+                localStorage.setItem('nipnime_effects_disabled', 'true');
+                if (holidayInstance) {
+                    @if($holidaySettings['christmas'])
+                        holidayInstance.destroy();
+                    @else
+                        holidayInstance.stop();
+                    @endif
+                }
+                container.innerHTML = '';
+                if(toggleText) toggleText.innerText = "Aktifkan Efek";
+            }
+        }
+
+        // Jalankan saat halaman load
+        document.addEventListener('DOMContentLoaded', startEffect);
     </script>
 @endif
 @endif

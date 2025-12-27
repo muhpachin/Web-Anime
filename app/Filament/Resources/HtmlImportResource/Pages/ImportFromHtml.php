@@ -130,9 +130,7 @@ class ImportFromHtml extends Page implements Forms\Contracts\HasForms
             }
         }
 
-                            // ...existing code...
-                        }
-                    }
+                        // ...existing code...
             $file = is_array($this->htmlFile) ? $this->htmlFile[0] : $this->htmlFile;
             $content = $file->get();
             $this->parseAndPreview($content);

@@ -56,26 +56,16 @@
                         </button>
                     </form>
 
-                    <div class="flex items-center gap-3 sm:gap-5">
-                        
-                        {{-- SAKLAR EFEK (DESKTOP) --}}
-                        @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
-                        <label class="hidden sm:flex items-center cursor-pointer group select-none">
-                            <div class="relative">
-                                <input type="checkbox" id="holidayToggle" class="sr-only peer" onchange="toggleHolidayEffect()">
-                                <div class="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
-                            </div>
-                            <span class="ml-2 text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:text-red-500 transition-colors">Efek</span>
-                        </label>
-                        @endif
-
+                    <div class="flex items-center gap-2 sm:gap-4">
                         @auth
                             <div class="flex items-center gap-2 sm:gap-3">
                                 <span class="text-sm font-bold text-gray-300 hidden md:inline">{{ Auth::user()->name }}</span>
                                 <div class="relative" id="profileDropdown">
                                     <button id="profileButton" class="w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white text-sm sm:text-base font-black hover:shadow-lg hover:shadow-red-600/40 transition-all uppercase border-2 border-red-600/50">
                                         @if(Auth::user()->avatar)
-                                            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
+                                            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+                                                 alt="{{ Auth::user()->name }}"
+                                                 class="w-full h-full object-cover">
                                         @else
                                             {{ substr(Auth::user()->name, 0, 1) }}
                                         @endif
@@ -84,7 +74,9 @@
                                         <div class="p-3 border-b border-white/10 flex items-center gap-3">
                                             <div class="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white font-black flex-shrink-0">
                                                 @if(Auth::user()->avatar)
-                                                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
+                                                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+                                                         alt="{{ Auth::user()->name }}"
+                                                         class="w-full h-full object-cover">
                                                 @else
                                                     {{ substr(Auth::user()->name, 0, 1) }}
                                                 @endif
@@ -94,40 +86,68 @@
                                                 <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
                                             </div>
                                         </div>
-                                        <a href="{{ route('profile.show') }}" class="block w-full text-left px-4 py-3 hover:bg-white/5 text-sm font-bold transition text-gray-300 hover:text-red-500">👤 PROFIL</a>
+                                        <a href="{{ route('profile.show') }}" class="block w-full text-left px-4 py-3 hover:bg-white/5 text-sm font-bold transition text-gray-300 hover:text-red-500">
+                                            👤 PROFIL
+                                        </a>
                                         <form action="{{ route('auth.logout') }}" method="POST">
                                             @csrf
-                                            <button type="submit" class="w-full text-left px-4 py-3 text-red-500 hover:bg-white/5 text-sm font-bold transition">🚪 LOGOUT</button>
+                                            <button type="submit" class="w-full text-left px-4 py-3 text-red-500 hover:bg-white/5 text-sm font-bold transition">
+                                                🚪 LOGOUT
+                                            </button>
                                         </form>
                                     </div>
                                 </div>
                             </div>
                         @else
-                            <a href="{{ route('auth.login') }}" class="text-xs sm:text-sm font-bold hover:text-red-500 transition px-2 sm:px-4 py-2 rounded-lg hover:bg-white/10 uppercase tracking-wider">🔐 Masuk</a>
-                            <a href="{{ route('auth.register') }}" class="text-xs sm:text-sm font-bold px-3 sm:px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg transition-all shadow-lg shadow-red-600/30 uppercase tracking-wider">Daftar</a>
+                            <a href="{{ route('auth.login') }}" class="text-xs sm:text-sm font-bold hover:text-red-500 transition px-2 sm:px-4 py-2 rounded-lg hover:bg-white/10 uppercase tracking-wider">
+                                🔐 <span class="hidden sm:inline">Masuk</span>
+                            </a>
+                            <a href="{{ route('auth.register') }}" class="text-xs sm:text-sm font-bold px-3 sm:px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg transition-all shadow-lg shadow-red-600/30 uppercase tracking-wider">
+                                <span class="hidden sm:inline">✓ Daftar</span>
+                                <span class="sm:hidden">Daftar</span>
+                            </a>
                         @endauth
 
+                        {{-- SAKLAR EFEK (DESKTOP) --}}
+                        @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
+                        <div class="hidden sm:flex items-center gap-2 border-l border-white/10 pl-4 ml-2">
+                            <label class="relative inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="holidayToggle" class="sr-only peer" onchange="toggleHolidayEffect()">
+                                <div class="w-10 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600 shadow-inner shadow-black/50 transition-colors"></div>
+                                <span class="ml-2 text-[10px] font-black text-gray-400 uppercase tracking-widest peer-checked:text-red-500 transition-colors">Efek</span>
+                            </label>
+                        </div>
+                        @endif
+
                         <button id="mobileMenuBtn" class="lg:hidden p-2 text-gray-400 hover:text-white transition">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="mobileMenu" class="hidden lg:hidden border-t border-white/10">
+        <div id="mobileMenu" class="hidden lg:hidden border-t border-white/10 bg-[#0f1115]">
             <div class="px-4 py-4 space-y-2">
-                <a href="{{ route('home') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('home') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">🏠 Home</a>
-                <a href="{{ route('search') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('search') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">📺 Daftar Anime</a>
-                <a href="{{ route('schedule') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('schedule') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">📅 Jadwal</a>
-                
+                <a href="{{ route('home') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('home') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">
+                    🏠 Home
+                </a>
+                <a href="{{ route('search') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('search') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">
+                    📺 Daftar Anime
+                </a>
+                <a href="{{ route('schedule') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('schedule') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">
+                    📅 Jadwal
+                </a>
+
                 {{-- SAKLAR EFEK (MOBILE) --}}
                 @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
-                <div class="flex items-center justify-between px-4 py-3 rounded-xl text-gray-300 hover:bg-white/10 transition">
+                <div class="flex items-center justify-between px-4 py-3 rounded-xl text-gray-300 bg-white/5 border border-white/5">
                     <span class="text-sm font-bold uppercase tracking-wider">✨ Efek Visual</span>
-                    <label class="relative inline-flex items-center cursor-pointer">
+                    <label class="relative inline-flex items-center cursor-pointer select-none">
                         <input type="checkbox" id="holidayToggleMobile" class="sr-only peer" onchange="toggleHolidayEffect()">
-                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                        <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600 shadow-inner shadow-black/50 transition-colors"></div>
                     </label>
                 </div>
                 @endif
@@ -137,62 +157,19 @@
 
     <main>@yield('content')</main>
 
-    <footer class="bg-gradient-to-t from-[#000000] via-[#0a0c10] to-[#1a1d24] border-t border-white/10 py-10 sm:py-16 mt-10 sm:mt-20 text-center">
-        <div class="max-w-7xl mx-auto px-4 italic text-gray-500 text-xs sm:text-sm">
-            © 2024 nipnime. All rights reserved. | Made with ❤️ for anime fans
+    <footer class="bg-gradient-to-t from-[#000000] via-[#0a0c10] to-[#1a1d24] border-t border-white/10 py-10 sm:py-16 mt-10 sm:mt-20">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-gray-500 text-xs sm:text-sm italic">
+                © 2024 nipnime. All rights reserved. | Made with ❤️ for anime fans
+            </p>
         </div>
     </footer>
 
     @livewireScripts
     @livewire('notifications')
 
-    {{-- KONTEN EFEK LIBURAN --}}
-    @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
-        <div id="holiday-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99998;"></div>
-        @if($holidaySettings['christmas'])
-            <script src="https://unpkg.com/magic-snowflakes/dist/snowflakes.min.js"></script>
-        @endif
-        @if($holidaySettings['new_year'])
-            <script src="https://unpkg.com/fireworks-js@2.x/dist/index.umd.js"></script>
-        @endif
-
-        <script>
-            let holidayInstance = null;
-            const toggleDesktop = document.getElementById('holidayToggle');
-            const toggleMobile = document.getElementById('holidayToggleMobile');
-            
-            function startEffect() {
-                const container = document.getElementById('holiday-container');
-                if(!container) return;
-
-                const isDisabled = localStorage.getItem('nipnime_effects_disabled') === 'true';
-                
-                // Set state saklar berdasarkan localStorage
-                if(toggleDesktop) toggleDesktop.checked = !isDisabled;
-                if(toggleMobile) toggleMobile.checked = !isDisabled;
-
-                if (isDisabled) return;
-
-                @if($holidaySettings['christmas'])
-                    holidayInstance = new Snowflakes({ color: '#ffffff', container: container });
-                @elseif($holidaySettings['new_year'])
-                    holidayInstance = new Fireworks.default(container, { intensity: 20, autoresize: true });
-                    holidayInstance.start();
-                @endif
-            }
-
-            function toggleHolidayEffect() {
-                const isDisabled = localStorage.getItem('nipnime_effects_disabled') === 'true';
-                localStorage.setItem('nipnime_effects_disabled', isDisabled ? 'false' : 'true');
-                location.reload(); 
-            }
-
-            document.addEventListener('DOMContentLoaded', startEffect);
-        </script>
-    @endif
-
     <script>
-        // Navbar Dropdown Script
+        // Navbar Controls
         document.addEventListener('DOMContentLoaded', function() {
             const profileButton = document.getElementById('profileButton');
             const profileMenu = document.getElementById('profileMenu');
@@ -218,5 +195,58 @@
             }
         });
     </script>
+
+    {{-- KONTEN EFEK LIBURAN --}}
+    @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
+        <div id="holiday-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99998;"></div>
+
+        @if($holidaySettings['christmas'])
+            <script src="https://unpkg.com/magic-snowflakes/dist/snowflakes.min.js"></script>
+        @endif
+        @if($holidaySettings['new_year'])
+            <script src="https://unpkg.com/fireworks-js@2.x/dist/index.umd.js"></script>
+        @endif
+
+        <script>
+            let holidayInstance = null;
+            
+            function startEffect() {
+                const container = document.getElementById('holiday-container');
+                if(!container) return;
+
+                const isDisabled = localStorage.getItem('nipnime_effects_disabled') === 'true';
+                
+                // Sync status saklar dengan localStorage
+                const toggleDesktop = document.getElementById('holidayToggle');
+                const toggleMobile = document.getElementById('holidayToggleMobile');
+                if(toggleDesktop) toggleDesktop.checked = !isDisabled;
+                if(toggleMobile) toggleMobile.checked = !isDisabled;
+
+                if (isDisabled) return;
+
+                @if($holidaySettings['christmas'])
+                    holidayInstance = new Snowflakes({ color: '#ffffff', container: container });
+                @elseif($holidaySettings['new_year'])
+                    holidayInstance = new Fireworks.default(container, { intensity: 20, autoresize: true });
+                    holidayInstance.start();
+                @endif
+            }
+
+            function toggleHolidayEffect() {
+                const isDisabled = localStorage.getItem('nipnime_effects_disabled') === 'true';
+                localStorage.setItem('nipnime_effects_disabled', isDisabled ? 'false' : 'true');
+                location.reload(); 
+            }
+
+            document.addEventListener('DOMContentLoaded', startEffect);
+        </script>
+    @endif
+
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f1115; }
+        ::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #b91c1c; }
+    </style>
 </body>
 </html>

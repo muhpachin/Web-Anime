@@ -340,5 +340,26 @@
             background: #b91c1c;
         }
     </style>
+    @if(isset($holidaySettings))
+    {{-- EFEK SALJU NATAL --}}
+    @if($holidaySettings['christmas'])
+        <script src="https://unpkg.com/magic-snowflakes/dist/snowflakes.min.js"></script>
+        <script>new Snowflakes({ color: '#ffffff' });</script>
+    @endif
+
+    {{-- EFEK KEMBANG API TAHUN BARU --}}
+    @if($holidaySettings['new_year'])
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+        <script>
+            var duration = 5 * 1000;
+            var animationEnd = Date.now() + duration;
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+            }, 250);
+        </script>
+    @endif
+@endif
 </body>
 </html>

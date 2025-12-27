@@ -56,6 +56,12 @@
                         </button>
                     </form>
 
+                    <button id="mobileSearchBtn" class="lg:hidden p-2 text-gray-400 hover:text-white transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </button>
+
                     <div class="flex items-center gap-2 sm:gap-4">
                         @auth
                             <div class="flex items-center gap-2 sm:gap-3">
@@ -129,6 +135,18 @@
             </div>
         </div>
 
+        <div id="mobileSearchBar" class="hidden lg:hidden px-4 pb-4 bg-[#0f1115]">
+            <form action="{{ route('search') }}" method="GET" class="relative">
+                <input type="text" name="search" placeholder="Cari anime..." 
+                       class="w-full bg-[#1a1d24] border-2 border-white/10 text-white rounded-full px-5 py-3 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-600/30 transition-all placeholder-gray-600">
+                <button type="submit" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+
         <div id="mobileMenu" class="hidden lg:hidden border-t border-white/10 bg-[#0f1115]">
             <div class="px-4 py-4 space-y-2">
                 <a href="{{ route('home') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('home') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">
@@ -139,6 +157,9 @@
                 </a>
                 <a href="{{ route('schedule') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('schedule') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">
                     📅 Jadwal
+                </a>
+                <a href="{{ route('search', ['type' => 'Movie']) }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider text-gray-300 hover:bg-white/10 transition">
+                    🎬 Movie
                 </a>
 
                 {{-- SAKLAR EFEK (MOBILE) --}}
@@ -155,13 +176,56 @@
         </div>
     </nav>
 
-    <main>@yield('content')</main>
+    <main id="main-content">@yield('content')</main>
 
     <footer class="bg-gradient-to-t from-[#000000] via-[#0a0c10] to-[#1a1d24] border-t border-white/10 py-10 sm:py-16 mt-10 sm:mt-20">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-gray-500 text-xs sm:text-sm italic">
-                © 2024 nipnime. All rights reserved. | Made with ❤️ for anime fans
-            </p>
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 mb-8 sm:mb-12">
+                <div class="col-span-2 sm:col-span-2 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+                        </div>
+                        <span class="text-xl sm:text-2xl font-black text-white font-['Montserrat'] uppercase"><span class="text-red-600">nip</span>nime</span>
+                    </div>
+                    <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">Platform streaming anime terlengkap dengan subtitle Indonesia berkualitas tinggi.</p>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-black uppercase tracking-wider mb-3 sm:mb-4 text-sm sm:text-base">Navigasi</h4>
+                    <ul class="space-y-1.5 sm:space-y-2 text-gray-400 text-xs sm:text-sm">
+                        <li><a href="{{ route('home') }}" class="hover:text-red-500 transition">Home</a></li>
+                        <li><a href="{{ route('search') }}" class="hover:text-red-500 transition">Daftar Anime</a></li>
+                        <li><a href="{{ route('schedule') }}" class="hover:text-red-500 transition">Jadwal Tayang</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-black uppercase tracking-wider mb-3 sm:mb-4 text-sm sm:text-base">Legal</h4>
+                    <ul class="space-y-1.5 sm:space-y-2 text-gray-400 text-xs sm:text-sm">
+                        <li><a href="{{ route('dmca') }}" class="hover:text-red-500 transition">DMCA</a></li>
+                        <li><a href="{{ route('privacy') }}" class="hover:text-red-500 transition">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-span-2 sm:col-span-1">
+                    <h4 class="text-white font-black uppercase tracking-wider mb-3 sm:mb-4 text-sm sm:text-base">Ikuti Kami</h4>
+                    <div class="flex gap-2 sm:gap-3">
+                        <a href="#" class="w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-red-600 rounded-lg flex items-center justify-center text-white transition-all">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                        </a>
+                        <a href="#" class="w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-red-600 rounded-lg flex items-center justify-center text-white transition-all">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-white/10 pt-6 sm:pt-8">
+                <p class="text-gray-500 text-center text-xs sm:text-sm">
+                    © 2024 nipnime. All rights reserved. | Made with ❤️ for anime fans
+                </p>
+            </div>
         </div>
     </footer>
 
@@ -169,14 +233,16 @@
     @livewire('notifications')
 
     <script>
-        // Navbar Controls
         document.addEventListener('DOMContentLoaded', function() {
             const profileButton = document.getElementById('profileButton');
             const profileMenu = document.getElementById('profileMenu');
             const profileDropdown = document.getElementById('profileDropdown');
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const mobileMenu = document.getElementById('mobileMenu');
+            const mobileSearchBtn = document.getElementById('mobileSearchBtn');
+            const mobileSearchBar = document.getElementById('mobileSearchBar');
 
+            // Profile Dropdown
             if (profileButton && profileMenu) {
                 profileButton.addEventListener('click', e => {
                     e.stopPropagation();
@@ -190,13 +256,28 @@
                 });
             }
 
+            // Mobile Menu Toggle
             if (mobileMenuBtn && mobileMenu) {
-                mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                    if (mobileSearchBar) mobileSearchBar.classList.add('hidden');
+                });
+            }
+
+            // Mobile Search Toggle (Fitur Lama)
+            if (mobileSearchBtn && mobileSearchBar) {
+                mobileSearchBtn.addEventListener('click', function() {
+                    mobileSearchBar.classList.toggle('hidden');
+                    if (mobileMenu) mobileMenu.classList.add('hidden');
+                    if (!mobileSearchBar.classList.contains('hidden')) {
+                        mobileSearchBar.querySelector('input').focus();
+                    }
+                });
             }
         });
     </script>
 
-    {{-- KONTEN EFEK LIBURAN --}}
+    {{-- KONTEN EFEK LIBURAN (ALGORITMA TETAP) --}}
     @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
         <div id="holiday-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99998;"></div>
 
@@ -216,7 +297,6 @@
 
                 const isDisabled = localStorage.getItem('nipnime_effects_disabled') === 'true';
                 
-                // Sync status saklar dengan localStorage
                 const toggleDesktop = document.getElementById('holidayToggle');
                 const toggleMobile = document.getElementById('holidayToggleMobile');
                 if(toggleDesktop) toggleDesktop.checked = !isDisabled;
@@ -243,6 +323,14 @@
     @endif
 
     <style>
+        /* Animasi FadeInUp Dari File Lama */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        main { animation: fadeInUp 0.5s ease-out; }
+
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f1115; }
         ::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 4px; }

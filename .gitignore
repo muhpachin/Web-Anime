@@ -6,8 +6,10 @@
 /vendor
 .env
 .env.backup
-.env.production
+# .env.production - keep for deployment reference
+.env.local
 .phpunit.result.cache
+anime_db_backup.sql
 Homestead.json
 Homestead.yaml
 auth.json

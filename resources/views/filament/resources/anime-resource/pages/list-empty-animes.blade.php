@@ -1,33 +1,43 @@
-@extends('filament::page')
-
-@section('content')
+<x-filament::page>
     <div class="space-y-4">
-        <h1 class="text-2xl font-bold">Anime Tanpa Episode / Video Server</h1>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead>
-                    <tr>
-                        <th class="px-4 py-2 text-left">#</th>
-                        <th class="px-4 py-2 text-left">Judul Anime</th>
-                        <th class="px-4 py-2 text-left">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($animes as $index => $anime)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2">{{ $index + 1 }}</td>
-                            <td class="px-4 py-2">{{ $anime->title }}</td>
-                            <td class="px-4 py-2">
-                                <button onclick="navigator.clipboard.writeText('{{ $anime->title }}')" class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">Copy Judul</button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="3" class="px-4 py-2 text-center">Semua anime sudah punya episode & video server.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <div class="grid gap-3">
+            @forelse($animes as $index => $anime)
+                <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                    <div class="flex items-center gap-4">
+                        <span class="flex items-center justify-center w-8 h-8 font-bold text-gray-400 bg-gray-100 rounded-full dark:bg-gray-700">
+                            {{ $index + 1 }}
+                        </span>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">{{ $anime->title }}</h3>
+                            <p class="text-xs text-gray-500 italic">Belum ada episode/video server</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <x-filament::button 
+                            size="sm" 
+                            color="secondary" 
+                            icon="heroicon-s-clipboard"
+                            onclick="navigator.clipboard.writeText('{{ $anime->title }}'); alert('Judul disalin: {{ $anime->title }}')"
+                        >
+                            Copy Judul
+                        </x-filament::button>
+
+                        <x-filament::button 
+                            size="sm" 
+                            tag="a" 
+                            href="{{ \App\Filament\Resources\AnimeResource::getUrl('edit', ['record' => $anime]) }}"
+                            icon="heroicon-s-pencil-square"
+                        >
+                            Edit
+                        </x-filament::button>
+                    </div>
+                </div>
+            @empty
+                <div class="p-10 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 dark:bg-gray-900">
+                    <p class="text-gray-500">✅ Semua anime sudah memiliki episode dan video server.</p>
+                </div>
+            @endforelse
         </div>
     </div>
-@endsection
+</x-filament::page>

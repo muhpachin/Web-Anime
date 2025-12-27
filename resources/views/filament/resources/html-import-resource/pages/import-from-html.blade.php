@@ -52,7 +52,7 @@
                 <div class="mt-6 flex gap-3">
                     <x-filament::button type="submit" color="success" :disabled="$isImporting">
                         @if($isImporting)
-                            <x-filament::loading-indicator class="w-4 h-4 mr-2" />
+                            <span class="w-4 h-4 mr-2 animate-spin">⏳</span>
                             Importing...
                         @else
                             🚀 Mulai Import

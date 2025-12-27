@@ -1,0 +1,60 @@
+<?php
+
+/**
+ * Debug Admin Access
+ */
+
+require __DIR__ . '/vendor/autoload.php';
+
+$app = require_once __DIR__ . '/bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel->bootstrap();
+
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+
+echo "╔════════════════════════════════════════════════════════════╗\n";
+echo "║   DEBUG ADMIN ACCESS                                       ║\n";
+echo "╚════════════════════════════════════════════════════════════╝\n\n";
+
+// Check user directly from database
+$user = DB::table('users')->where('email', 'naufalrabbani146@gmail.com')->first();
+
+if (!$user) {
+    echo "❌ User not found!\n";
+    exit(1);
+}
+
+echo "📊 USER DATA FROM DATABASE:\n";
+echo "   ID: {$user->id}\n";
+echo "   Name: {$user->name}\n";
+echo "   Email: {$user->email}\n";
+echo "   is_admin: " . ($user->is_admin ? "✅ TRUE (1)" : "❌ FALSE (0)") . "\n";
+echo "   Raw value: " . var_export($user->is_admin, true) . "\n\n";
+
+// Check via Eloquent
+$eloquentUser = User::find($user->id);
+echo "📊 USER DATA FROM ELOQUENT:\n";
+echo "   ID: {$eloquentUser->id}\n";
+echo "   Name: {$eloquentUser->name}\n";
+echo "   Email: {$eloquentUser->email}\n";
+echo "   is_admin: " . var_export($eloquentUser->is_admin, true) . "\n";
+
+// Check canAccessFilament
+try {
+    $canAccess = $eloquentUser->canAccessFilament();
+    echo "   canAccessFilament(): " . ($canAccess ? "✅ TRUE" : "❌ FALSE") . "\n";
+} catch (Exception $e) {
+    echo "   canAccessFilament(): ❌ ERROR - {$e->getMessage()}\n";
+}
+
+// Check canAccessPanel
+try {
+    $panel = new \Filament\Panel('admin');
+    $canAccessPanel = $eloquentUser->canAccessPanel($panel);
+    echo "   canAccessPanel(): " . ($canAccessPanel ? "✅ TRUE" : "❌ FALSE") . "\n";
+} catch (Exception $e) {
+    echo "   canAccessPanel(): ❌ ERROR - {$e->getMessage()}\n";
+}
+
+echo "\n";

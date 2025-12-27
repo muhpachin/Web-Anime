@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Episode;
+use App\Models\WatchHistory;
+use App\Models\Comment;
 
 class WatchController extends Controller
 {
@@ -13,13 +15,68 @@ class WatchController extends Controller
     {
         $episode->load('anime.genres', 'videoServers');
 
+        // Track watch history for logged in users
+        if (auth()->check()) {
+            WatchHistory::updateOrCreate(
+                [
+                    'user_id' => auth()->id(),
+                    'episode_id' => $episode->id,
+                ],
+                [
+                    'anime_id' => $episode->anime_id,
+                    'last_watched_at' => now(),
+                    'progress' => 0,
+                    'completed' => false,
+                ]
+            );
+        }
+
+        // Load only episodes of this anime that have video servers
         $animeEpisodes = $episode->anime->episodes()
+            ->whereHas('videoServers')
             ->orderBy('episode_number', 'asc')
             ->get();
+
+        // Load comments for this episode (parent only, with replies)
+        $comments = Comment::where('anime_id', $episode->anime_id)
+            ->where('episode_id', $episode->id)
+            ->parentOnly()
+            ->with(['user', 'replies.user'])
+            ->latest()
+            ->paginate(10);
 
         return view('watch', [
             'episode' => $episode,
             'animeEpisodes' => $animeEpisodes,
+            'comments' => $comments,
         ]);
+    }
+
+    /**
+     * Update watch progress via AJAX
+     */
+    public function updateProgress(Episode $episode)
+    {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $progress = request('progress', 0);
+        $completed = request('completed', false);
+
+        WatchHistory::updateOrCreate(
+            [
+                'user_id' => auth()->id(),
+                'episode_id' => $episode->id,
+            ],
+            [
+                'anime_id' => $episode->anime_id,
+                'progress' => $progress,
+                'completed' => $completed,
+                'last_watched_at' => now(),
+            ]
+        );
+
+        return response()->json(['success' => true]);
     }
 }

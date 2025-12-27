@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'animesail' => [
+        'base_url' => env('ANIMESAIL_BASE_URL', 'https://154.26.137.28'),
+        'verify_ssl' => env('ANIMESAIL_VERIFY_SSL', false),
+    ],
+
 ];

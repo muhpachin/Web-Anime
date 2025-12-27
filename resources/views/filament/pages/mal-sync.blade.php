@@ -95,14 +95,19 @@
                     {{-- Progress Bar --}}
                     @if($isSyncing)
                     <div class="mb-5">
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden shadow-inner">
-                            <div class="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-4 rounded-full transition-all duration-300 ease-out flex items-center justify-end px-2" 
-                                 style="width: {{ $syncProgress }}%">
+                        <div class="w-full h-4 rounded-full overflow-hidden shadow-inner bg-gray-200 dark:bg-gray-700">
+                            <!-- Colored progress fill -->
+                            <div
+                                class="h-4 rounded-full transition-all duration-300 ease-out flex items-center justify-end px-2 bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500"
+                                style="width: {{ $syncProgress }}%; background: linear-gradient(90deg, #dc2626 0%, #f97316 50%, #eab308 100%);"
+                            >
                                 @if($syncProgress > 10)
-                                    <span class="text-xs font-bold text-white">{{ $syncProgress }}%</span>
+                                    <span class="text-xs font-bold text-white drop-shadow-sm">{{ $syncProgress }}%</span>
                                 @endif
                             </div>
                         </div>
+                        <!-- Thin accent line for extra visibility -->
+                        <div class="mt-2 h-1 rounded-full bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500" style="width: {{ max(10, $syncProgress) }}%"></div>
                     </div>
                     @endif
                     

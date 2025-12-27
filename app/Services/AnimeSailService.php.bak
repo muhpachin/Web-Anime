@@ -1,0 +1,417 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Anime;
+use App\Models\Episode;
+use App\Models\VideoServer;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+use Symfony\Component\DomCrawler\Crawler;
+
+class AnimeSailService
+{
+    protected $baseUrl = 'https://animesail.in';
+
+    public function __construct()
+    {
+        $this->baseUrl = config('services.animesail.base_url', $this->baseUrl);
+    }
+
+    protected function http()
+    {
+        $verify = (bool) config('services.animesail.verify_ssl', true);
+        return \Illuminate\Support\Facades\Http::withOptions(['verify' => $verify])
+            ->withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            ])
+            ->timeout(30)
+            ->retry(2, 500);
+    }
+    
+    /**
+     * Search anime on AnimeSail
+     */
+    public function searchAnime($query)
+    {
+        try {
+            // Build typical WordPress search URL
+            $searchUrl = rtrim($this->baseUrl, '/') . '/?s=' . urlencode($query);
+            $response = $this->http()->get($searchUrl);
+
+            if (!$response->successful()) {
+                return [];
+            }
+
+            $crawler = new Crawler($response->body());
+            $results = [];
+
+            // Try multiple selectors for search results
+            $crawler->filter('.post-item, .post, .search-result, .entry-title')->each(function (Crawler $node) use (&$results) {
+                try {
+                    $linkNode = $node->filter('a')->first();
+                    $title = $linkNode->text();
+                    $url = $linkNode->attr('href');
+                    
+                    $results[] = [
+                        'title' => trim($title),
+                        'url' => $url,
+                        'slug' => basename(parse_url($url, PHP_URL_PATH)),
+                    ];
+                } catch (\Exception $e) {
+                    // Skip invalid entries
+                }
+            });
+
+            return $results;
+        } catch (\Exception $e) {
+            \Log::error("AnimeSail search failed: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get anime details page
+     */
+    public function getAnimeDetails($animeUrl)
+    {
+        try {
+            $response = $this->http()->get($animeUrl);
+
+            if (!$response->successful()) {
+                return null;
+            }
+
+            $crawler = new Crawler($response->body());
+            
+            $episodes = [];
+            
+            // Extract episode links
+            // Extract episode links from common patterns
+            $crawler->filter('.episode-list a, .episodelist a, .entry-content a, .eplister a, .episodes a, ul li a')->each(function (Crawler $node) use (&$episodes) {
+                try {
+                    $text = $node->text();
+                    $href = $node->attr('href');
+                    
+                    // Check if this looks like an episode link
+                    if (preg_match('/episode|ep\s*\d+/i', $text)) {
+                        $episodeNumber = $this->extractEpisodeNumber($text);
+                        
+                        if ($episodeNumber) {
+                            $episodes[] = [
+                                'number' => $episodeNumber,
+                                'title' => trim($text),
+                                'url' => $href,
+                            ];
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // Skip invalid entries
+                }
+            });
+
+            return [
+                'episodes' => $episodes,
+            ];
+        } catch (\Exception $e) {
+            \Log::error("AnimeSail anime details failed: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get episode video servers from episode page
+     */
+    public function getEpisodeServers($episodeUrl)
+    {
+        try {
+            $response = $this->http()->get($episodeUrl);
+
+            if (!$response->successful()) {
+                return [];
+            }
+
+            $crawler = new Crawler($response->body());
+            $servers = [];
+            $scheme = parse_url($episodeUrl, PHP_URL_SCHEME) ?: 'https';
+            $host = parse_url($episodeUrl, PHP_URL_HOST);
+            $base = ($scheme && $host) ? ($scheme . '://' . $host) : rtrim($this->baseUrl, '/');
+
+            // Look for iframes (video embeds)
+            $crawler->filter('iframe')->each(function (Crawler $node) use (&$servers, $base) {
+                try {
+                    $src = $node->attr('src') ?? $node->attr('data-src');
+                    if ($src && strpos($src, '//') === 0) {
+                        $src = 'https:' . $src;
+                    } elseif ($src && !preg_match('/^https?:/i', $src)) {
+                        $src = rtrim($base, '/') . '/' . ltrim($src, '/');
+                    }
+                    
+                    if ($this->isValidVideoUrl($src)) {
+                        $serverName = $this->getServerName($src);
+                        
+                        $servers[] = [
+                            'name' => $serverName,
+                            'url' => $src,
+                            'type' => 'iframe',
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Skip invalid entries
+                }
+            });
+
+            // Look for video links in content
+            $crawler->filter('.entry-content a, .server-list a, a')->each(function (Crawler $node) use (&$servers, $base) {
+                try {
+                    $href = $node->attr('href');
+                    $text = $node->text();
+                    if ($href && strpos($href, '//') === 0) {
+                        $href = 'https:' . $href;
+                    } elseif ($href && !preg_match('/^https?:/i', $href)) {
+                        $href = rtrim($base, '/') . '/' . ltrim($href, '/');
+                    }
+                    
+                    if ($this->isValidVideoUrl($href)) {
+                        $serverName = !empty($text) ? trim($text) : $this->getServerName($href);
+                        
+                        // Avoid duplicates
+                        $exists = false;
+                        foreach ($servers as $server) {
+                            if ($server['url'] === $href) {
+                                $exists = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!$exists) {
+                            $servers[] = [
+                                'name' => $serverName,
+                                'url' => $href,
+                                'type' => 'link',
+                            ];
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // Skip invalid entries
+                }
+            });
+
+            return $servers;
+        } catch (\Exception $e) {
+            \Log::error("AnimeSail episode servers failed: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Sync a single episode from a direct episode URL
+     */
+    public function syncSingleEpisodeFromUrl(Anime $anime, string $episodeUrl)
+    {
+        $created = 0; $updated = 0; $errors = [];
+        try {
+            // Determine episode number
+            $number = null;
+            if (preg_match('/episode[-_\s]?(\d+)/i', $episodeUrl, $m)) {
+                $number = (int) $m[1];
+            }
+
+            $response = $this->http()->get($episodeUrl);
+            if ($response->successful()) {
+                $html = $response->body();
+                // Try to extract title/number from page h1 or title
+                $crawler = new Crawler($html);
+                try {
+                    $h1 = $crawler->filter('h1, .entry-title')->first();
+                    $titleText = $h1->count() ? trim($h1->text()) : null;
+                    if (!$number && $titleText && preg_match('/(?:episode|ep)\s*(\d+)/i', $titleText, $mm)) {
+                        $number = (int) $mm[1];
+                    }
+                } catch (\Exception $e) {}
+            }
+
+            if (!$number) {
+                $errors[] = 'Cannot detect episode number from URL/page';
+                return ['created' => 0, 'updated' => 0, 'errors' => $errors];
+            }
+
+            $slug = Str::slug("{$anime->title} Episode {$number}");
+            $episode = Episode::updateOrCreate(
+                [
+                    'anime_id' => $anime->id,
+                    'episode_number' => $number,
+                ],
+                [
+                    'title' => ($titleText ?? ("Episode {$number}")),
+                    'slug' => $slug,
+                ]
+            );
+
+            $wasNew = $episode->wasRecentlyCreated;
+
+            // Servers
+            $servers = $this->getEpisodeServers($episodeUrl);
+            foreach ($servers as $serverData) {
+                VideoServer::updateOrCreate(
+                    [
+                        'episode_id' => $episode->id,
+                        'embed_url' => $serverData['url'],
+                    ],
+                    [
+                        'server_name' => $serverData['name'],
+                        'is_active' => true,
+                    ]
+                );
+            }
+
+            if ($wasNew) $created++; else $updated++;
+        } catch (\Exception $e) {
+            $errors[] = $e->getMessage();
+        }
+
+        return ['created' => $created, 'updated' => $updated, 'errors' => $errors];
+    }
+
+    /**
+     * Sync episodes and servers for an anime
+     */
+    public function syncEpisodesForAnime(Anime $anime, $animeSailUrl)
+    {
+        $animeDetails = $this->getAnimeDetails($animeSailUrl);
+        
+        if (!$animeDetails || empty($animeDetails['episodes'])) {
+            return ['created' => 0, 'updated' => 0, 'errors' => ['No episodes found']];
+        }
+
+        $created = 0;
+        $updated = 0;
+        $errors = [];
+
+        foreach ($animeDetails['episodes'] as $episodeData) {
+            try {
+                $slug = Str::slug("{$anime->title} Episode {$episodeData['number']}");
+                
+                $episode = Episode::updateOrCreate(
+                    [
+                        'anime_id' => $anime->id,
+                        'episode_number' => $episodeData['number'],
+                    ],
+                    [
+                        'title' => $episodeData['title'],
+                        'slug' => $slug,
+                    ]
+                );
+
+                $wasRecentlyCreated = $episode->wasRecentlyCreated;
+
+                // Fetch video servers for this episode
+                $servers = $this->getEpisodeServers($episodeData['url']);
+                
+                foreach ($servers as $serverData) {
+                    VideoServer::updateOrCreate(
+                        [
+                            'episode_id' => $episode->id,
+                            'embed_url' => $serverData['url'],
+                        ],
+                        [
+                            'server_name' => $serverData['name'],
+                            'is_active' => true,
+                        ]
+                    );
+                }
+
+                if ($wasRecentlyCreated) {
+                    $created++;
+                } else {
+                    $updated++;
+                }
+
+                // Rate limiting
+                usleep(500000); // 500ms delay between episode requests
+                
+            } catch (\Exception $e) {
+                $errors[] = "Episode {$episodeData['number']}: " . $e->getMessage();
+            }
+        }
+
+        return [
+            'created' => $created,
+            'updated' => $updated,
+            'errors' => $errors,
+        ];
+    }
+
+    /**
+     * Extract episode number from text
+     */
+    protected function extractEpisodeNumber($text)
+    {
+        if (preg_match('/(?:episode|ep)\s*(\d+)/i', $text, $matches)) {
+            return (int)$matches[1];
+        }
+        
+        if (preg_match('/\b(\d+)\b/', $text, $matches)) {
+            return (int)$matches[1];
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if URL is a valid video URL
+     */
+    protected function isValidVideoUrl($url)
+    {
+        if (empty($url)) return false;
+        
+        $videoHosts = [
+            'youtube.com',
+            'youtu.be',
+            'mp4upload.com',
+            'streamtape.com',
+            'doodstream.com',
+            'streamsb.net',
+            'fembed.com',
+            'dailymotion.com',
+            'acefile.co',
+        ];
+
+        foreach ($videoHosts as $host) {
+            if (stripos($url, $host) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get server name from URL
+     */
+    protected function getServerName($url)
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+        
+        $nameMap = [
+            'youtube.com' => 'YouTube',
+            'youtu.be' => 'YouTube',
+            'mp4upload.com' => 'MP4Upload',
+            'streamtape.com' => 'StreamTape',
+            'doodstream.com' => 'DoodStream',
+            'streamsb.net' => 'StreamSB',
+            'fembed.com' => 'Fembed',
+            'dailymotion.com' => 'Dailymotion',
+            'acefile.co' => 'AceFile',
+        ];
+
+        foreach ($nameMap as $domain => $name) {
+            if (stripos($host, $domain) !== false) {
+                return $name;
+            }
+        }
+
+        return $host ?? 'Unknown';
+    }
+}

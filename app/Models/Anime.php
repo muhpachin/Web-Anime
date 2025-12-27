@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Anime extends Model
 {
@@ -42,6 +43,14 @@ class Anime extends Model
     public function episodes(): HasMany
     {
         return $this->hasMany(Episode::class)->orderBy('episode_number', 'asc');
+    }
+
+    /**
+     * Get the schedule for this anime.
+     */
+    public function schedule(): HasOne
+    {
+        return $this->hasOne(Schedule::class);
     }
 
     /**

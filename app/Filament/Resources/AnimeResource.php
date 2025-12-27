@@ -6,6 +6,8 @@ use App\Filament\Resources\AnimeResource\Pages;
 use App\Filament\Resources\AnimeResource\RelationManagers;
 use App\Models\Anime;
 use App\Models\Genre;
+use App\Models\Episode;
+use App\Models\VideoServer;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
@@ -14,6 +16,7 @@ use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class AnimeResource extends Resource
@@ -159,35 +162,77 @@ class AnimeResource extends Resource
                     ->icon('heroicon-o-play')
                     ->color('success')
                     ->form([
-                        Forms\Components\TextInput::make('source_url')
-                            ->label('Source URL (optional)')
-                            ->placeholder('https://animesail.in/...')
-                            ->helperText('Kosongkan untuk auto-search berdasarkan judul'),
+                        Forms\Components\Textarea::make('html_source')
+                            ->label('HTML Source (optional)')
+                            ->rows(8)
+                            ->placeholder('Paste HTML dari halaman anime (opsional)')
+                            ->helperText('Jika situs memakai JavaScript, paste HTML yang sudah di-load untuk mempercepat sync'),
+                        Forms\Components\FileUpload::make('html_file')
+                            ->label('Upload HTML (optional)')
+                            ->acceptedFileTypes(['text/html','text/plain'])
+                            ->directory('uploads/html')
+                            ->helperText('Alternatif: upload file HTML yang berisi daftar episode'),
+                        Forms\Components\Toggle::make('delete_missing')
+                            ->label('Hapus episode yang tidak ada di HTML')
+                            ->helperText('Setelah sync, episode yang tidak ada di HTML akan dihapus'),
                     ])
                     ->action(function (Anime $record, array $data) {
                         $service = app(\App\Services\AnimeSailService::class);
 
-                        $url = $data['source_url'] ?? null;
-                        if (empty($url)) {
-                            $results = $service->searchAnime($record->title);
-                            $url = $results[0]['url'] ?? null;
+                        $html = null;
+                        if (!empty($data['html_source'])) {
+                            $html = $data['html_source'];
+                        } elseif (!empty($data['html_file'])) {
+                            // Read uploaded file from public storage
+                            $path = storage_path('app/public/' . $data['html_file']);
+                            if (is_file($path)) {
+                                $html = file_get_contents($path);
+                            }
                         }
 
-                        if (!$url) {
+                        // HTML is now required
+                        if (empty($html)) {
                             \Filament\Notifications\Notification::make()
-                                ->title('Source not found')
+                                ->title('HTML Required')
                                 ->danger()
-                                ->body('Tidak ditemukan sumber video untuk judul ini.')
+                                ->body('Mohon paste atau upload HTML halaman anime terlebih dahulu.')
                                 ->send();
                             return;
                         }
 
-                        $result = $service->syncEpisodesForAnime($record, $url);
+                        // For getting anime URL from HTML, we need to detect it from the HTML context
+                        // We'll extract from the page or use a fallback approach
+                        $url = null;
+                        // Try to detect URL from HTML meta og:url or from page context
+                        if (preg_match('/og:url["\']?\s+content=["\']([^"\']+)["\']/', $html, $m)) {
+                            $url = $m[1];
+                        }
+                        
+                        // Parse details first (for optional cleanup)
+                        $details = $service->getAnimeDetailsFromHtml($url, $html);
+                        $result = $service->syncEpisodesFromHtml($record, $html, $url);
+
+                        // Optional cleanup: delete episodes not present in HTML
+                        if (!empty($data['delete_missing']) && !empty($details['episodes'])) {
+                            $keptNumbers = collect($details['episodes'])->pluck('number')->unique()->values()->all();
+                            $toDelete = Episode::where('anime_id', $record->id)
+                                ->whereNotIn('episode_number', $keptNumbers)
+                                ->pluck('id');
+                            if ($toDelete->count() > 0) {
+                                VideoServer::whereIn('episode_id', $toDelete)->delete();
+                                Episode::whereIn('id', $toDelete)->delete();
+                            }
+                        }
+
+                        $errorText = '';
+                        if (!empty($result['errors'])) {
+                            $errorText = "\nErrors: " . implode('; ', array_slice($result['errors'], 0, 3));
+                        }
 
                         \Filament\Notifications\Notification::make()
                             ->title('Sync videos completed')
                             ->success()
-                            ->body("Created: {$result['created']} | Updated: {$result['updated']} | Errors: " . count($result['errors']))
+                            ->body("Created: {$result['created']} | Updated: {$result['updated']} | Errors: " . count($result['errors']) . $errorText)
                             ->send();
                     })
                         ->requiresConfirmation(),

@@ -56,6 +56,82 @@
             
             <!-- Main Content -->
             <div class="lg:col-span-3">
+                @auth
+                    @if(isset($continueWatching) && $continueWatching->count() > 0)
+                    <!-- Continue Watching Section -->
+                    <div class="mb-16">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-1.5 h-10 bg-gradient-to-b from-purple-600 to-purple-700 rounded-full"></div>
+                            <div>
+                                <h2 class="text-4xl font-black text-white uppercase tracking-tight">Lanjutkan Tonton</h2>
+                                <p class="text-gray-400 text-sm mt-1">Melanjutkan dari terakhir kali kamu nonton</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-6">
+                            @foreach($continueWatching as $history)
+                                @php
+                                    $anime = $history->anime;
+                                    $episode = $history->episode;
+                                    $progressPercent = $history->progress > 0 ? min(100, ($history->progress / 1440) * 100) : 0; // Assuming 24 min episodes
+                                @endphp
+                                <a href="{{ route('watch', $episode) }}" class="group block">
+                                    <div class="relative bg-[#1a1d24] rounded-2xl overflow-hidden border border-white/10 group-hover:border-purple-600/50 transition-all duration-300 shadow-lg">
+                                        <div class="relative aspect-[3/4] overflow-hidden">
+                                            <img src="{{ $anime->poster_image ? asset('storage/' . $anime->poster_image) : asset('images/placeholder.png') }}" 
+                                                 alt="{{ $anime->title }}"
+                                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 bg-gray-800">
+                                            
+                                            <!-- Overlay -->
+                                            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                            
+                                            <!-- Episode Badge -->
+                                            <div class="absolute top-3 left-3">
+                                                <div class="bg-gradient-to-r from-purple-600 to-purple-700 text-[10px] font-black px-3 py-1.5 rounded-lg shadow-lg text-white uppercase tracking-wider">
+                                                    EP {{ $episode->episode_number }}
+                                                </div>
+                                            </div>
+
+                                            <!-- Progress Bar -->
+                                            @if($progressPercent > 0)
+                                            <div class="absolute bottom-0 left-0 right-0 h-1.5 bg-black/60">
+                                                <div class="h-full bg-gradient-to-r from-purple-600 to-purple-700 transition-all" 
+                                                     style="width: {{ $progressPercent }}%"></div>
+                                            </div>
+                                            @endif
+
+                                            <!-- Play Button -->
+                                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-75 group-hover:scale-100">
+                                                <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-full flex items-center justify-center shadow-xl shadow-purple-600/50">
+                                                    <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Info -->
+                                        <div class="p-4 bg-gradient-to-b from-[#1a1d24] to-[#0f1115]">
+                                            <h3 class="text-white font-bold text-sm line-clamp-2 group-hover:text-purple-500 transition-colors min-h-[2.5rem]">{{ $anime->title }}</h3>
+                                            <div class="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+                                                <span class="text-[10px] text-gray-500 font-semibold">
+                                                    @if($history->completed)
+                                                        ✓ Selesai
+                                                    @else
+                                                        {{ number_format($progressPercent, 0) }}% ditonton
+                                                    @endif
+                                                </span>
+                                                <span class="text-[10px] text-gray-400 font-semibold">{{ $history->last_watched_at->diffForHumans() }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+                @endauth
+
                 <!-- Section Header -->
                 <div class="mb-10">
                     <div class="flex items-center gap-4 mb-4">
@@ -69,8 +145,10 @@
 
                 <!-- Episodes Grid -->
                 <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-6">
+                    @php $order = 0; @endphp
                     @foreach($latestEpisodes as $anime)
                         @foreach($anime->episodes as $episode)
+                        <!-- Debug Order: {{ ++$order }}. {{ $anime->title }} -->
                         <a href="{{ route('watch', $episode) }}" class="group block">
                             <div class="relative bg-[#1a1d24] rounded-2xl overflow-hidden border border-white/10 group-hover:border-red-600/50 transition-all duration-300 shadow-lg">
                                 <div class="relative aspect-[3/4] overflow-hidden">

@@ -31,8 +31,11 @@
                         <a href="{{ route('home') }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('home') ? 'text-red-500 bg-white/10' : '' }}">
                             🏠 Home
                         </a>
-                        <a href="{{ route('search') }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition">
+                        <a href="{{ route('search') }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('search') ? 'text-red-500 bg-white/10' : '' }}">
                             📺 Daftar Anime
+                        </a>
+                        <a href="{{ route('schedule') }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('schedule') ? 'text-red-500 bg-white/10' : '' }}">
+                            📅 Jadwal
                         </a>
                         <a href="{{ route('search', ['type' => 'Movie']) }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition">
                             🎬 Movie
@@ -58,16 +61,36 @@
                         @auth
                             <div class="flex items-center gap-3">
                                 <span class="text-sm font-bold text-gray-300 hidden sm:inline">{{ Auth::user()->name }}</span>
-                                <div class="relative group">
-                                    <button class="w-11 h-11 rounded-full bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white font-black hover:shadow-lg hover:shadow-red-600/40 transition-all uppercase">
-                                        {{ substr(Auth::user()->name, 0, 1) }}
+                                <div class="relative" id="profileDropdown">
+                                    <button id="profileButton" class="w-11 h-11 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white font-black hover:shadow-lg hover:shadow-red-600/40 transition-all uppercase border-2 border-red-600/50">
+                                        @if(Auth::user()->avatar)
+                                            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+                                                 alt="{{ Auth::user()->name }}"
+                                                 class="w-full h-full object-cover">
+                                        @else
+                                            {{ substr(Auth::user()->name, 0, 1) }}
+                                        @endif
                                     </button>
                                     <!-- Dropdown Menu -->
-                                    <div class="absolute right-0 mt-2 w-48 bg-[#1a1d24] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-white/10 z-50">
-                                        <div class="p-3 border-b border-white/10">
-                                            <p class="text-sm font-bold text-white">{{ Auth::user()->name }}</p>
-                                            <p class="text-xs text-gray-500">{{ Auth::user()->email }}</p>
+                                    <div id="profileMenu" class="absolute right-0 mt-2 w-48 bg-[#1a1d24] rounded-xl shadow-xl opacity-0 invisible transition-all duration-300 border border-white/10 z-50">
+                                        <div class="p-3 border-b border-white/10 flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white font-black flex-shrink-0">
+                                                @if(Auth::user()->avatar)
+                                                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+                                                         alt="{{ Auth::user()->name }}"
+                                                         class="w-full h-full object-cover">
+                                                @else
+                                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-bold text-white">{{ Auth::user()->name }}</p>
+                                                <p class="text-xs text-gray-500">{{ Auth::user()->email }}</p>
+                                            </div>
                                         </div>
+                                        <a href="{{ route('profile.show') }}" class="block w-full text-left px-4 py-3 hover:bg-white/5 text-sm font-bold transition text-gray-300 hover:text-red-500">
+                                            👤 PROFIL
+                                        </a>
                                         <form action="{{ route('auth.logout') }}" method="POST">
                                             @csrf
                                             <button type="submit" class="w-full text-left px-4 py-3 text-red-500 hover:bg-white/5 text-sm font-bold transition">
@@ -90,6 +113,39 @@
             </div>
         </div>
     </nav>
+
+    <!-- Dropdown Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileButton = document.getElementById('profileButton');
+            const profileMenu = document.getElementById('profileMenu');
+            const profileDropdown = document.getElementById('profileDropdown');
+
+            if (profileButton && profileMenu) {
+                // Toggle on button click
+                profileButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileMenu.classList.toggle('opacity-0');
+                    profileMenu.classList.toggle('invisible');
+                });
+
+                // Close when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!profileDropdown.contains(e.target)) {
+                        profileMenu.classList.add('opacity-0', 'invisible');
+                    }
+                });
+
+                // Close when clicking a menu item (except forms)
+                const profileLink = profileMenu.querySelector('a');
+                if (profileLink) {
+                    profileLink.addEventListener('click', function() {
+                        profileMenu.classList.add('opacity-0', 'invisible');
+                    });
+                }
+            }
+        });
+    </script>
 
     <!-- Main Content -->
     <main>@yield('content')</main>
@@ -116,8 +172,8 @@
                     <ul class="space-y-2 text-gray-400 text-sm">
                         <li><a href="{{ route('home') }}" class="hover:text-red-500 transition">Home</a></li>
                         <li><a href="{{ route('search') }}" class="hover:text-red-500 transition">Daftar Anime</a></li>
-                        <li><a href="#" class="hover:text-red-500 transition">Jadwal Rilis</a></li>
-                        <li><a href="#" class="hover:text-red-500 transition">Top Anime</a></li>
+                        <li><a href="{{ route('schedule') }}" class="hover:text-red-500 transition">Jadwal Tayang</a></li>
+                        <li><a href="{{ route('search', ['type' => 'Movie']) }}" class="hover:text-red-500 transition">Movie</a></li>
                     </ul>
                 </div>
 

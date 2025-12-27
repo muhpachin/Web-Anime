@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Anime;
+use App\Models\Comment;
 
 class DetailController extends Controller
 {
@@ -11,7 +12,16 @@ class DetailController extends Controller
      */
     public function show(Anime $anime)
     {
-        $anime->load('genres', 'episodes.videoServers');
+        // Load only episodes with video servers
+        $anime->load(['genres', 'episodes' => fn ($q) => $q->whereHas('videoServers')->orderBy('episode_number', 'asc')]);
+
+        // Load comments (parent only, with replies and user)
+        $comments = Comment::where('anime_id', $anime->id)
+            ->whereNull('episode_id')
+            ->parentOnly()
+            ->with(['user', 'replies.user'])
+            ->latest()
+            ->paginate(10);
 
         $relatedAnimes = Anime::whereHas('genres', function ($query) use ($anime) {
             $query->whereIn('genre_id', $anime->genres->pluck('id'));
@@ -23,6 +33,7 @@ class DetailController extends Controller
 
         return view('detail', [
             'anime' => $anime,
+            'comments' => $comments,
             'relatedAnimes' => $relatedAnimes,
         ]);
     }

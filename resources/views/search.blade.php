@@ -18,9 +18,17 @@
             <!-- Filter Sidebar -->
             <aside class="w-full lg:w-80 flex-shrink-0">
                 <div class="bg-gradient-to-br from-[#1a1d24] to-[#0f1115] rounded-3xl p-8 border border-white/10 sticky top-28 backdrop-blur-xl shadow-2xl shadow-black/50">
-                    <div class="flex items-center gap-3 mb-8">
-                        <div class="w-1 h-8 bg-gradient-to-b from-red-600 to-red-700 rounded-full"></div>
-                        <h3 class="text-2xl font-black text-white uppercase tracking-tight">Filter</h3>
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center gap-3">
+                            <div class="w-1 h-8 bg-gradient-to-b from-red-600 to-red-700 rounded-full"></div>
+                            <h3 class="text-2xl font-black text-white uppercase tracking-tight">Filter</h3>
+                        </div>
+                        @php
+                            $activeFilters = collect(['search', 'genre', 'status', 'type', 'year'])->filter(fn($f) => request()->filled($f))->count();
+                        @endphp
+                        @if($activeFilters > 0)
+                            <span class="bg-red-600 text-white text-xs font-black px-2.5 py-1 rounded-full">{{ $activeFilters }}</span>
+                        @endif
                     </div>
 
                     <form action="{{ route('search') }}" method="GET" class="space-y-6">
@@ -45,13 +53,45 @@
                             </select>
                         </div>
 
+                        <!-- Status Select -->
+                        <div class="group">
+                            <label class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 block group-focus-within:text-red-500 transition">📊 Status</label>
+                            <select name="status" class="w-full bg-[#0f1115] border-2 border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-600/20 transition-all appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;utf8,<svg fill=\"none\" stroke=\"%23888888\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 14l-7 7m0 0l-7-7m7 7V3\"></path></svg>'); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;">
+                                <option value="" class="bg-[#1a1d24]">Semua Status</option>
+                                <option value="Ongoing" class="bg-[#1a1d24]" @selected(request('status') == 'Ongoing')>Ongoing</option>
+                                <option value="Completed" class="bg-[#1a1d24]" @selected(request('status') == 'Completed')>Completed</option>
+                            </select>
+                        </div>
+
+                        <!-- Type Select -->
+                        <div class="group">
+                            <label class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 block group-focus-within:text-red-500 transition">📺 Tipe</label>
+                            <select name="type" class="w-full bg-[#0f1115] border-2 border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-600/20 transition-all appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;utf8,<svg fill=\"none\" stroke=\"%23888888\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 14l-7 7m0 0l-7-7m7 7V3\"></path></svg>'); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;">
+                                <option value="" class="bg-[#1a1d24]">Semua Tipe</option>
+                                <option value="TV" class="bg-[#1a1d24]" @selected(request('type') == 'TV')>TV</option>
+                                <option value="Movie" class="bg-[#1a1d24]" @selected(request('type') == 'Movie')>Movie</option>
+                                <option value="ONA" class="bg-[#1a1d24]" @selected(request('type') == 'ONA')>ONA</option>
+                            </select>
+                        </div>
+
+                        <!-- Year Select -->
+                        <div class="group">
+                            <label class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 block group-focus-within:text-red-500 transition">📅 Tahun</label>
+                            <select name="year" class="w-full bg-[#0f1115] border-2 border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-600/20 transition-all appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;utf8,<svg fill=\"none\" stroke=\"%23888888\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 14l-7 7m0 0l-7-7m7 7V3\"></path></svg>'); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;">
+                                <option value="" class="bg-[#1a1d24]">Semua Tahun</option>
+                                @foreach($availableYears as $year)
+                                    <option value="{{ $year }}" class="bg-[#1a1d24]" @selected(request('year') == $year)>{{ $year }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <!-- Submit Button -->
                         <button type="submit" class="w-full py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black text-sm rounded-xl transition-all duration-300 shadow-lg shadow-red-600/30 hover:shadow-xl hover:shadow-red-600/40 uppercase tracking-wider transform hover:scale-[1.02] active:scale-95">
                             ✓ Terapkan Filter
                         </button>
 
                         <!-- Clear Filter -->
-                        @if(request()->anyFilled(['search', 'genre', 'type']))
+                        @if(request()->anyFilled(['search', 'genre', 'status', 'type', 'year', 'season']))
                             <a href="{{ route('search') }}" class="block w-full text-center py-3 border-2 border-gray-600 text-gray-400 hover:text-white hover:border-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all duration-300">
                                 ✕ Hapus Semua Filter
                             </a>

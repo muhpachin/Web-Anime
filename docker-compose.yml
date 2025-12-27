@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     image: webdevops/php-nginx:8.2-alpine

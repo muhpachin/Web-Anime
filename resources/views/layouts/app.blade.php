@@ -13,7 +13,7 @@
 </head>
 <body class="antialiased bg-[#0f1115] text-gray-300 font-['Inter'] overflow-x-hidden">
     
-    <nav class="bg-[#0f1115]/95 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50 shadow-xl shadow-black/40">
+    <nav class="bg-[#0f1115]/95 backdrop-blur-md border-b border-white/5 sticky top-0 z-50 shadow-xl shadow-black/40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 md:h-20">
                 
@@ -99,7 +99,7 @@
             </form>
         </div>
 
-        <div id="mobileMenu" class="lg:hidden bg-[#0f1115]/98 border-t border-white/5 transition-all duration-500 ease-in-out max-h-0 opacity-0 overflow-hidden">
+        <div id="mobileMenu" class="lg:hidden bg-[#0f1115]/98 border-t border-white/5 transition-all duration-500 ease-in-out max-h-0 opacity-0 overflow-hidden pointer-events-none">
             <div class="p-4 space-y-1">
                 <a href="{{ route('home') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold {{ request()->routeIs('home') ? 'bg-red-600 text-white' : 'text-gray-400 hover:bg-white/5' }}">🏠 HOME</a>
                 <a href="{{ route('search') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold {{ request()->routeIs('search') ? 'bg-red-600 text-white' : 'text-gray-400 hover:bg-white/5' }}">📺 DAFTAR ANIME</a>
@@ -109,7 +109,7 @@
                 <div class="pt-4 border-t border-white/5 mt-4">
                     @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
                     <div class="flex items-center justify-between px-4 py-4 bg-white/5 rounded-xl">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">✨ Efek Visual Halaman</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">✨ Efek Visual</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="holidayToggleMobile" class="sr-only peer" onchange="toggleHolidayEffect()">
                             <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:bg-red-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
@@ -121,7 +121,7 @@
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 min-h-[60vh]">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-10 md:pt-4 min-h-[60vh]">
         @yield('content')
     </main>
 
@@ -136,7 +136,7 @@
                         </div>
                         <span class="text-xl font-black text-white font-['Montserrat'] uppercase"><span class="text-red-600">nip</span>nime</span>
                     </div>
-                    <p class="text-gray-500 text-sm leading-relaxed text-balance">Platform streaming anime subtitle Indonesia terlengkap dengan kualitas video HD.</p>
+                    <p class="text-gray-500 text-sm leading-relaxed">Nikmati pengalaman menonton anime subtitle Indonesia terbaik dengan kualitas video HD.</p>
                 </div>
 
                 <div>
@@ -153,7 +153,6 @@
                     <ul class="space-y-3 text-sm text-gray-500">
                         <li><a href="#" class="hover:text-red-500 transition">DMCA</a></li>
                         <li><a href="#" class="hover:text-red-500 transition">Kebijakan Privasi</a></li>
-                        <li><a href="#" class="hover:text-red-500 transition">Syarat Ketentuan</a></li>
                     </ul>
                 </div>
 
@@ -171,7 +170,7 @@
             </div>
 
             <div class="border-t border-white/5 pt-8 text-center">
-                <p class="text-gray-600 text-[10px] uppercase tracking-widest">© 2024-2025 nipnime — Built with passion for anime fans</p>
+                <p class="text-gray-600 text-[10px] uppercase tracking-widest">© 2024-2025 nipnime — Built for anime fans</p>
             </div>
         </div>
     </footer>
@@ -189,7 +188,6 @@
             const mobileSearchBtn = document.getElementById('mobileSearchBtn');
             const mobileSearchBar = document.getElementById('mobileSearchBar');
 
-            // 1. Logic Dropdown Profile
             if (profileBtn && profileMenu) {
                 profileBtn.onclick = (e) => {
                     e.stopPropagation();
@@ -200,33 +198,27 @@
                 window.onclick = () => profileMenu.classList.add('opacity-0', 'invisible', 'translate-y-2');
             }
 
-            // 2. Logic Dropdown Menu Mobile (Animasi Mulus)
             if (mobileMenuBtn && mobileMenu) {
                 mobileMenuBtn.onclick = () => {
                     const isClosed = mobileMenu.classList.contains('max-h-0');
-                    
                     if (isClosed) {
-                        mobileMenu.classList.remove('max-h-0', 'opacity-0');
-                        mobileMenu.classList.add('max-h-[500px]', 'opacity-100');
+                        mobileMenu.classList.remove('max-h-0', 'opacity-0', 'pointer-events-none');
+                        mobileMenu.classList.add('max-h-[500px]', 'opacity-100', 'pointer-events-auto');
                         burgerIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>';
                     } else {
-                        mobileMenu.classList.add('max-h-0', 'opacity-0');
-                        mobileMenu.classList.remove('max-h-[500px]', 'opacity-100');
+                        mobileMenu.classList.add('max-h-0', 'opacity-0', 'pointer-events-none');
+                        mobileMenu.classList.remove('max-h-[500px]', 'opacity-100', 'pointer-events-auto');
                         burgerIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>';
                     }
-                    if (mobileSearchBar) mobileSearchBar.classList.add('hidden');
                 };
             }
 
-            // 3. Logic Search Mobile
             if (mobileSearchBtn && mobileSearchBar) {
                 mobileSearchBtn.onclick = () => {
                     mobileSearchBar.classList.toggle('hidden');
                     if (!mobileSearchBar.classList.contains('hidden')) {
                         mobileSearchBar.querySelector('input').focus();
-                        // Tutup menu jika search dibuka
-                        mobileMenu.classList.add('max-h-0', 'opacity-0');
-                        burgerIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>';
+                        mobileMenu.classList.add('max-h-0', 'opacity-0', 'pointer-events-none');
                     }
                 };
             }
@@ -234,31 +226,21 @@
     </script>
 
     @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
-        <div id="holiday-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99998;"></div>
+        <div id="holiday-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 40;"></div>
         @if($holidaySettings['christmas']) <script src="https://unpkg.com/magic-snowflakes/dist/snowflakes.min.js"></script> @endif
         @if($holidaySettings['new_year']) <script src="https://unpkg.com/fireworks-js@2.x/dist/index.umd.js"></script> @endif
         <script>
             function startEffect() {
-                const container = document.getElementById('holiday-container');
                 const isDisabled = localStorage.getItem('nipnime_effects_disabled') === 'true';
-                
-                // Sync switch
-                const toggleD = document.getElementById('holidayToggle');
-                const toggleM = document.getElementById('holidayToggleMobile');
-                if(toggleD) toggleD.checked = !isDisabled;
-                if(toggleM) toggleM.checked = !isDisabled;
-
+                if(document.getElementById('holidayToggle')) document.getElementById('holidayToggle').checked = !isDisabled;
+                if(document.getElementById('holidayToggleMobile')) document.getElementById('holidayToggleMobile').checked = !isDisabled;
                 if (isDisabled) return;
-
-                @if($holidaySettings['christmas'])
-                    new Snowflakes({ color: '#ffffff', container: container });
-                @elseif($holidaySettings['new_year'])
-                    new Fireworks.default(container, { intensity: 15 }).start();
-                @endif
+                const container = document.getElementById('holiday-container');
+                @if($holidaySettings['christmas']) new Snowflakes({ color: '#ffffff', container: container });
+                @elseif($holidaySettings['new_year']) new Fireworks.default(container, { intensity: 15 }).start(); @endif
             }
             function toggleHolidayEffect() {
-                const current = localStorage.getItem('nipnime_effects_disabled') === 'true';
-                localStorage.setItem('nipnime_effects_disabled', current ? 'false' : 'true');
+                localStorage.setItem('nipnime_effects_disabled', localStorage.getItem('nipnime_effects_disabled') === 'true' ? 'false' : 'true');
                 location.reload(); 
             }
             document.addEventListener('DOMContentLoaded', startEffect);
@@ -266,21 +248,12 @@
     @endif
 
     <style>
-        @keyframes fadeInUp { 
-            from { opacity: 0; transform: translateY(15px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
+        /* Animasi Konten */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         main { animation: fadeInUp 0.4s ease-out forwards; }
-        
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #0f1115; }
         ::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #b91c1c; }
-
-        /* Mencegah pergerakan layout saat transisi menu */
-        #mobileMenu {
-            transition: max-height 0.5s ease-in-out, opacity 0.4s ease-in-out;
-        }
     </style>
 </body>
 </html>

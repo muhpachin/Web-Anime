@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title') - nipnime</title>
     
@@ -11,220 +11,165 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="antialiased bg-[#0f1115] text-gray-300 font-['Inter']">
+<body class="antialiased bg-[#0f1115] text-gray-300 font-['Inter'] overflow-x-hidden">
     
-    <nav class="bg-[#0f1115]/90 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50 shadow-xl shadow-black/20">
+    <nav class="bg-[#0f1115]/95 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50 shadow-xl shadow-black/40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 sm:h-20">
-                <div class="flex items-center gap-4 lg:gap-10">
-                    <a href="{{ route('home') }}" class="group flex items-center gap-2 sm:gap-3 hover:scale-105 transition-transform">
-                        <div class="w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-lg shadow-red-600/30 group-hover:shadow-red-600/50 transition-all">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+            <div class="flex items-center justify-between h-16 md:h-20">
+                
+                <div class="flex items-center gap-3 md:gap-8">
+                    <a href="{{ route('home') }}" class="group flex items-center gap-2 hover:scale-105 transition-transform shrink-0">
+                        <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg shadow-red-600/20 group-hover:shadow-red-600/40 transition-all">
+                            <svg class="w-5 h-5 md:w-6 md:h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
                         </div>
-                        <span class="text-xl sm:text-3xl font-black text-white tracking-tighter font-['Montserrat'] uppercase"><span class="text-red-600">nip</span>nime</span>
+                        <span class="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tighter font-['Montserrat'] uppercase"><span class="text-red-600">nip</span>nime</span>
                     </a>
                     
-                    <div class="hidden lg:flex items-center space-x-1 text-sm font-bold uppercase tracking-widest">
-                        <a href="{{ route('home') }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('home') ? 'text-red-500 bg-white/10' : '' }}">
-                            🏠 Home
-                        </a>
-                        <a href="{{ route('search') }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('search') ? 'text-red-500 bg-white/10' : '' }}">
-                            📺 Daftar Anime
-                        </a>
-                        <a href="{{ route('schedule') }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('schedule') ? 'text-red-500 bg-white/10' : '' }}">
-                            📅 Jadwal
-                        </a>
-                        <a href="{{ route('search', ['type' => 'Movie']) }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition">
-                            🎬 Movie
-                        </a>
-                        @auth
-                        <a href="{{ route('request.index') }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('request.*') ? 'text-red-500 bg-white/10' : '' }}">
-                            📝 Request
-                        </a>
-                        @endauth
+                    <div class="hidden lg:flex items-center space-x-1 text-[11px] xl:text-xs font-bold uppercase tracking-widest">
+                        <a href="{{ route('home') }}" class="px-3 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('home') ? 'text-red-500 bg-white/10' : '' }}">Home</a>
+                        <a href="{{ route('search') }}" class="px-3 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('search') ? 'text-red-500 bg-white/10' : '' }}">Anime</a>
+                        <a href="{{ route('schedule') }}" class="px-3 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('schedule') ? 'text-red-500 bg-white/10' : '' }}">Jadwal</a>
+                        <a href="{{ route('search', ['type' => 'Movie']) }}" class="px-3 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition">Movie</a>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 sm:gap-4 lg:gap-6">
-                    <form action="{{ route('search') }}" method="GET" class="hidden lg:block relative group">
+                <div class="flex items-center gap-1 sm:gap-3 md:gap-6">
+                    
+                    <form action="{{ route('search') }}" method="GET" class="hidden md:block relative group">
                         <input type="text" name="search" placeholder="Cari anime..." 
-                               class="w-48 xl:w-72 bg-[#1a1d24] border-2 border-white/10 text-white rounded-full px-5 py-2.5 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-600/30 transition-all placeholder-gray-600 focus:placeholder-gray-500">
-                        <button type="submit" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500 transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
+                               class="w-40 lg:w-64 xl:w-80 bg-[#1a1d24] border border-white/10 text-white rounded-full px-4 py-2 text-xs focus:border-red-600 focus:ring-4 focus:ring-red-600/10 transition-all placeholder-gray-600">
+                        <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-red-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         </button>
                     </form>
 
-                    <button id="mobileSearchBtn" class="lg:hidden p-2 text-gray-400 hover:text-white transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
+                    <button id="mobileSearchBtn" class="md:hidden p-2 text-gray-400 hover:text-white transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </button>
 
-                    <div class="flex items-center gap-2 sm:gap-4">
+                    <div class="flex items-center gap-2">
                         @auth
-                            <div class="flex items-center gap-2 sm:gap-3">
-                                <span class="text-sm font-bold text-gray-300 hidden md:inline">{{ Auth::user()->name }}</span>
-                                <div class="relative" id="profileDropdown">
-                                    <button id="profileButton" class="w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white text-sm sm:text-base font-black hover:shadow-lg hover:shadow-red-600/40 transition-all uppercase border-2 border-red-600/50">
-                                        @if(Auth::user()->avatar)
-                                            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
-                                                 alt="{{ Auth::user()->name }}"
-                                                 class="w-full h-full object-cover">
-                                        @else
-                                            {{ substr(Auth::user()->name, 0, 1) }}
-                                        @endif
-                                    </button>
-                                    <div id="profileMenu" class="absolute right-0 mt-2 w-48 bg-[#1a1d24] rounded-xl shadow-xl opacity-0 invisible transition-all duration-300 border border-white/10 z-50">
-                                        <div class="p-3 border-b border-white/10 flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white font-black flex-shrink-0">
-                                                @if(Auth::user()->avatar)
-                                                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
-                                                         alt="{{ Auth::user()->name }}"
-                                                         class="w-full h-full object-cover">
-                                                @else
-                                                    {{ substr(Auth::user()->name, 0, 1) }}
-                                                @endif
-                                            </div>
-                                            <div class="overflow-hidden">
-                                                <p class="text-sm font-bold text-white truncate">{{ Auth::user()->name }}</p>
-                                                <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
-                                            </div>
-                                        </div>
-                                        <a href="{{ route('profile.show') }}" class="block w-full text-left px-4 py-3 hover:bg-white/5 text-sm font-bold transition text-gray-300 hover:text-red-500">
-                                            👤 PROFIL
-                                        </a>
-                                        <form action="{{ route('auth.logout') }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="w-full text-left px-4 py-3 text-red-500 hover:bg-white/5 text-sm font-bold transition">
-                                                🚪 LOGOUT
-                                            </button>
-                                        </form>
+                            <div class="relative" id="profileDropdown">
+                                <button id="profileButton" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-600 flex items-center justify-center text-white text-xs md:text-sm font-black border-2 border-red-600/20 overflow-hidden">
+                                    @if(Auth::user()->avatar)
+                                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" class="w-full h-full object-cover">
+                                    @else
+                                        {{ substr(Auth::user()->name, 0, 1) }}
+                                    @endif
+                                </button>
+                                <div id="profileMenu" class="absolute right-0 mt-3 w-56 bg-[#1a1d24] rounded-xl shadow-2xl opacity-0 invisible transition-all border border-white/10 z-50">
+                                    <div class="p-4 border-b border-white/5">
+                                        <p class="text-xs font-bold text-gray-500 uppercase">Akun Saya</p>
+                                        <p class="text-sm font-bold text-white truncate">{{ Auth::user()->name }}</p>
                                     </div>
+                                    <a href="{{ route('profile.show') }}" class="block px-4 py-3 text-sm hover:bg-white/5 transition">👤 Profil</a>
+                                    <form action="{{ route('auth.logout') }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-white/5 transition">🚪 Logout</button>
+                                    </form>
                                 </div>
                             </div>
                         @else
-                            <a href="{{ route('auth.login') }}" class="text-xs sm:text-sm font-bold hover:text-red-500 transition px-2 sm:px-4 py-2 rounded-lg hover:bg-white/10 uppercase tracking-wider">
-                                🔐 <span class="hidden sm:inline">Masuk</span>
-                            </a>
-                            <a href="{{ route('auth.register') }}" class="text-xs sm:text-sm font-bold px-3 sm:px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg transition-all shadow-lg shadow-red-600/30 uppercase tracking-wider">
-                                <span class="hidden sm:inline">✓ Daftar</span>
-                                <span class="sm:hidden">Daftar</span>
-                            </a>
+                            <a href="{{ route('auth.login') }}" class="text-[10px] md:text-xs font-bold uppercase p-2 hover:text-red-500 transition">Masuk</a>
+                            <a href="{{ route('auth.register') }}" class="text-[10px] md:text-xs font-bold uppercase px-3 py-2 md:px-4 md:py-2.5 bg-red-600 text-white rounded-lg shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all">Daftar</a>
                         @endauth
-
-                        {{-- SAKLAR EFEK (DESKTOP) --}}
-                        @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
-                        <div class="hidden sm:flex items-center gap-2 border-l border-white/10 pl-4 ml-2">
-                            <label class="relative inline-flex items-center cursor-pointer select-none">
-                                <input type="checkbox" id="holidayToggle" class="sr-only peer" onchange="toggleHolidayEffect()">
-                                <div class="w-10 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600 shadow-inner shadow-black/50 transition-colors"></div>
-                                <span class="ml-2 text-[10px] font-black text-gray-400 uppercase tracking-widest peer-checked:text-red-500 transition-colors">Efek</span>
-                            </label>
-                        </div>
-                        @endif
-
-                        <button id="mobileMenuBtn" class="lg:hidden p-2 text-gray-400 hover:text-white transition">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                            </svg>
-                        </button>
                     </div>
+
+                    @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
+                    <div class="hidden sm:flex items-center border-l border-white/10 pl-4 ml-1">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="holidayToggle" class="sr-only peer" onchange="toggleHolidayEffect()">
+                            <div class="w-8 h-4 bg-gray-700 rounded-full peer peer-checked:bg-red-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4"></div>
+                        </label>
+                    </div>
+                    @endif
+
+                    <button id="mobileMenuBtn" class="lg:hidden p-2 text-gray-400 hover:text-white transition">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div id="mobileSearchBar" class="hidden lg:hidden px-4 pb-4 bg-[#0f1115]">
-            <form action="{{ route('search') }}" method="GET" class="relative">
-                <input type="text" name="search" placeholder="Cari anime..." 
-                       class="w-full bg-[#1a1d24] border-2 border-white/10 text-white rounded-full px-5 py-3 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-600/30 transition-all placeholder-gray-600">
-                <button type="submit" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </button>
+        <div id="mobileSearchBar" class="hidden md:hidden px-4 pb-4 animate-fadeIn">
+            <form action="{{ route('search') }}" method="GET">
+                <input type="text" name="search" placeholder="Cari anime..." class="w-full bg-[#1a1d24] border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:border-red-600 focus:ring-0">
             </form>
         </div>
 
-        <div id="mobileMenu" class="hidden lg:hidden border-t border-white/10 bg-[#0f1115]">
-            <div class="px-4 py-4 space-y-2">
-                <a href="{{ route('home') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('home') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">
-                    🏠 Home
-                </a>
-                <a href="{{ route('search') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('search') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">
-                    📺 Daftar Anime
-                </a>
-                <a href="{{ route('schedule') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('schedule') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">
-                    📅 Jadwal
-                </a>
-                <a href="{{ route('search', ['type' => 'Movie']) }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider text-gray-300 hover:bg-white/10 transition">
-                    🎬 Movie
-                </a>
-
-                {{-- SAKLAR EFEK (MOBILE) --}}
-                @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
-                <div class="flex items-center justify-between px-4 py-3 rounded-xl text-gray-300 bg-white/5 border border-white/5">
-                    <span class="text-sm font-bold uppercase tracking-wider">✨ Efek Visual</span>
-                    <label class="relative inline-flex items-center cursor-pointer select-none">
-                        <input type="checkbox" id="holidayToggleMobile" class="sr-only peer" onchange="toggleHolidayEffect()">
-                        <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600 shadow-inner shadow-black/50 transition-colors"></div>
-                    </label>
+        <div id="mobileMenu" class="hidden lg:hidden border-t border-white/5 bg-[#0f1115]/98 overflow-y-auto max-h-[calc(100vh-80px)]">
+            <div class="p-4 space-y-1">
+                <a href="{{ route('home') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold {{ request()->routeIs('home') ? 'bg-red-600 text-white' : 'text-gray-400 hover:bg-white/5' }}">🏠 HOME</a>
+                <a href="{{ route('search') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold {{ request()->routeIs('search') ? 'bg-red-600 text-white' : 'text-gray-400 hover:bg-white/5' }}">📺 DAFTAR ANIME</a>
+                <a href="{{ route('schedule') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold {{ request()->routeIs('schedule') ? 'bg-red-600 text-white' : 'text-gray-400 hover:bg-white/5' }}">📅 JADWAL TAYANG</a>
+                <a href="{{ route('search', ['type' => 'Movie']) }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-400 hover:bg-white/5">🎬 MOVIE</a>
+                
+                <div class="pt-4 border-t border-white/5 mt-4">
+                    @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
+                    <div class="flex items-center justify-between px-4 py-4 bg-white/5 rounded-xl">
+                        <span class="text-xs font-bold uppercase tracking-widest text-gray-400">✨ Efek Visual</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="holidayToggleMobile" class="sr-only peer" onchange="toggleHolidayEffect()">
+                            <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:bg-red-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                        </label>
+                    </div>
+                    @endif
                 </div>
-                @endif
             </div>
         </div>
     </nav>
 
-    <main id="main-content">@yield('content')</main>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 min-h-[60vh]">
+        @yield('content')
+    </main>
 
-    <footer class="bg-gradient-to-t from-[#000000] via-[#0a0c10] to-[#1a1d24] border-t border-white/10 py-10 sm:py-16 mt-10 sm:mt-20">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 mb-8 sm:mb-12">
-                <div class="col-span-2 sm:col-span-2 md:col-span-1">
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+    <footer class="bg-gradient-to-t from-black via-[#0a0c10] to-[#0f1115] border-t border-white/5 py-12 md:py-20 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12 mb-12">
+                
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
                         </div>
-                        <span class="text-xl sm:text-2xl font-black text-white font-['Montserrat'] uppercase"><span class="text-red-600">nip</span>nime</span>
+                        <span class="text-xl font-black text-white font-['Montserrat'] uppercase"><span class="text-red-600">nip</span>nime</span>
                     </div>
-                    <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">Platform streaming anime terlengkap dengan subtitle Indonesia berkualitas tinggi.</p>
+                    <p class="text-gray-500 text-sm leading-relaxed">Nikmati pengalaman menonton anime subtitle Indonesia terbaik dengan kualitas video HD dan server yang stabil.</p>
                 </div>
 
                 <div>
-                    <h4 class="text-white font-black uppercase tracking-wider mb-3 sm:mb-4 text-sm sm:text-base">Navigasi</h4>
-                    <ul class="space-y-1.5 sm:space-y-2 text-gray-400 text-xs sm:text-sm">
-                        <li><a href="{{ route('home') }}" class="hover:text-red-500 transition">Home</a></li>
+                    <h4 class="text-white font-bold uppercase tracking-wider mb-5 text-sm">Navigasi</h4>
+                    <ul class="space-y-3 text-sm text-gray-500">
+                        <li><a href="{{ route('home') }}" class="hover:text-red-500 transition">Beranda</a></li>
                         <li><a href="{{ route('search') }}" class="hover:text-red-500 transition">Daftar Anime</a></li>
-                        <li><a href="{{ route('schedule') }}" class="hover:text-red-500 transition">Jadwal Tayang</a></li>
+                        <li><a href="{{ route('schedule') }}" class="hover:text-red-500 transition">Jadwal Rilis</a></li>
                     </ul>
                 </div>
 
                 <div>
-                    <h4 class="text-white font-black uppercase tracking-wider mb-3 sm:mb-4 text-sm sm:text-base">Legal</h4>
-                    <ul class="space-y-1.5 sm:space-y-2 text-gray-400 text-xs sm:text-sm">
-                        <li><a href="{{ route('dmca') }}" class="hover:text-red-500 transition">DMCA</a></li>
-                        <li><a href="{{ route('privacy') }}" class="hover:text-red-500 transition">Privacy Policy</a></li>
+                    <h4 class="text-white font-bold uppercase tracking-wider mb-5 text-sm">Bantuan</h4>
+                    <ul class="space-y-3 text-sm text-gray-500">
+                        <li><a href="#" class="hover:text-red-500 transition">DMCA</a></li>
+                        <li><a href="#" class="hover:text-red-500 transition">Kebijakan Privasi</a></li>
+                        <li><a href="#" class="hover:text-red-500 transition">Hubungi Kami</a></li>
                     </ul>
                 </div>
 
-                <div class="col-span-2 sm:col-span-1">
-                    <h4 class="text-white font-black uppercase tracking-wider mb-3 sm:mb-4 text-sm sm:text-base">Ikuti Kami</h4>
-                    <div class="flex gap-2 sm:gap-3">
-                        <a href="#" class="w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-red-600 rounded-lg flex items-center justify-center text-white transition-all">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                <div>
+                    <h4 class="text-white font-bold uppercase tracking-wider mb-5 text-sm">Komunitas</h4>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-red-600 hover:text-white transition-all text-gray-400">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                         </a>
-                        <a href="#" class="w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-red-600 rounded-lg flex items-center justify-center text-white transition-all">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                        <a href="#" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-red-600 hover:text-white transition-all text-gray-400">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div class="border-t border-white/10 pt-6 sm:pt-8">
-                <p class="text-gray-500 text-center text-xs sm:text-sm">
-                    © 2024 nipnime. All rights reserved. | Made with ❤️ for anime fans
-                </p>
+            <div class="border-t border-white/5 pt-8 text-center">
+                <p class="text-gray-600 text-[10px] md:text-xs uppercase tracking-[0.2em]">© 2025 nipnime — Built for the community</p>
             </div>
         </div>
     </footer>
@@ -234,7 +179,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const profileButton = document.getElementById('profileButton');
+            const profileBtn = document.getElementById('profileButton');
             const profileMenu = document.getElementById('profileMenu');
             const profileDropdown = document.getElementById('profileDropdown');
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -242,99 +187,69 @@
             const mobileSearchBtn = document.getElementById('mobileSearchBtn');
             const mobileSearchBar = document.getElementById('mobileSearchBar');
 
-            // Profile Dropdown
-            if (profileButton && profileMenu) {
-                profileButton.addEventListener('click', e => {
+            // Dropdown Profile
+            if (profileBtn && profileMenu) {
+                profileBtn.onclick = (e) => {
                     e.stopPropagation();
                     profileMenu.classList.toggle('opacity-0');
                     profileMenu.classList.toggle('invisible');
-                });
-                document.addEventListener('click', e => {
-                    if (profileDropdown && !profileDropdown.contains(e.target)) {
-                        profileMenu.classList.add('opacity-0', 'invisible');
-                    }
-                });
+                    profileMenu.classList.toggle('translate-y-2');
+                };
+                window.onclick = () => {
+                    profileMenu.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                };
             }
 
-            // Mobile Menu Toggle
-            if (mobileMenuBtn && mobileMenu) {
-                mobileMenuBtn.addEventListener('click', () => {
+            // Mobile Menu
+            if (mobileMenuBtn) {
+                mobileMenuBtn.onclick = () => {
                     mobileMenu.classList.toggle('hidden');
+                    document.body.classList.toggle('overflow-hidden');
                     if (mobileSearchBar) mobileSearchBar.classList.add('hidden');
-                });
+                };
             }
 
-            // Mobile Search Toggle (Fitur Lama)
-            if (mobileSearchBtn && mobileSearchBar) {
-                mobileSearchBtn.addEventListener('click', function() {
+            // Mobile Search
+            if (mobileSearchBtn) {
+                mobileSearchBtn.onclick = () => {
                     mobileSearchBar.classList.toggle('hidden');
-                    if (mobileMenu) mobileMenu.classList.add('hidden');
                     if (!mobileSearchBar.classList.contains('hidden')) {
                         mobileSearchBar.querySelector('input').focus();
                     }
-                });
+                };
             }
         });
     </script>
 
-    {{-- KONTEN EFEK LIBURAN (ALGORITMA TETAP) --}}
     @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
         <div id="holiday-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99998;"></div>
-
-        @if($holidaySettings['christmas'])
-            <script src="https://unpkg.com/magic-snowflakes/dist/snowflakes.min.js"></script>
-        @endif
-        @if($holidaySettings['new_year'])
-            <script src="https://unpkg.com/fireworks-js@2.x/dist/index.umd.js"></script>
-        @endif
-
+        @if($holidaySettings['christmas']) <script src="https://unpkg.com/magic-snowflakes/dist/snowflakes.min.js"></script> @endif
+        @if($holidaySettings['new_year']) <script src="https://unpkg.com/fireworks-js@2.x/dist/index.umd.js"></script> @endif
         <script>
-            let holidayInstance = null;
-            
             function startEffect() {
                 const container = document.getElementById('holiday-container');
-                if(!container) return;
-
                 const isDisabled = localStorage.getItem('nipnime_effects_disabled') === 'true';
-                
-                const toggleDesktop = document.getElementById('holidayToggle');
-                const toggleMobile = document.getElementById('holidayToggleMobile');
-                if(toggleDesktop) toggleDesktop.checked = !isDisabled;
-                if(toggleMobile) toggleMobile.checked = !isDisabled;
-
+                document.getElementById('holidayToggle').checked = !isDisabled;
+                if(document.getElementById('holidayToggleMobile')) document.getElementById('holidayToggleMobile').checked = !isDisabled;
                 if (isDisabled) return;
-
-                @if($holidaySettings['christmas'])
-                    holidayInstance = new Snowflakes({ color: '#ffffff', container: container });
-                @elseif($holidaySettings['new_year'])
-                    holidayInstance = new Fireworks.default(container, { intensity: 20, autoresize: true });
-                    holidayInstance.start();
-                @endif
+                @if($holidaySettings['christmas']) new Snowflakes({ color: '#ffffff', container: container });
+                @elseif($holidaySettings['new_year']) new Fireworks.default(container, { intensity: 15 }).start(); @endif
             }
-
             function toggleHolidayEffect() {
-                const isDisabled = localStorage.getItem('nipnime_effects_disabled') === 'true';
-                localStorage.setItem('nipnime_effects_disabled', isDisabled ? 'false' : 'true');
+                localStorage.setItem('nipnime_effects_disabled', localStorage.getItem('nipnime_effects_disabled') === 'true' ? 'false' : 'true');
                 location.reload(); 
             }
-
             document.addEventListener('DOMContentLoaded', startEffect);
         </script>
     @endif
 
     <style>
-        /* Animasi FadeInUp Dari File Lama */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        main { animation: fadeInUp 0.5s ease-out; }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        main { animation: fadeInUp 0.4s ease-out forwards; }
+        .animate-fadeIn { animation: fadeInUp 0.2s ease-out forwards; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #0f1115; }
-        ::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #b91c1c; }
+        ::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 10px; }
     </style>
 </body>
 </html>

@@ -164,6 +164,12 @@ class AnimeSailService
         $host = $animeUrl ? parse_url($animeUrl, PHP_URL_HOST) : parse_url($this->baseUrl, PHP_URL_HOST);
         $base = ($scheme && $host) ? ($scheme . '://' . $host) : rtrim($this->baseUrl, '/');
 
+        // Try to infer slug from the page URL for stricter matching later
+        $slug = null;
+        if ($animeUrl && preg_match('#/anime/([^/]+)/?#', $animeUrl, $sm)) {
+            $slug = $sm[1];
+        }
+
         foreach ($matches as $match) {
             $href = $match[1];
             $text = trim($match[2]);
@@ -192,6 +198,50 @@ class AnimeSailService
                         'url' => $href,
                     ];
                 }
+            }
+        }
+
+        // Fallback: parse anchors in the episode list area only (avoid sidebar/history noise)
+        if (empty($episodes)) {
+            try {
+                $crawler = new Crawler($html);
+                $crawler->filter('ul.daftar a, .eps-list a, .epslink a')->each(function (Crawler $node) use (&$episodes, $base, $slug) {
+                    try {
+                        $href = $node->attr('href') ?? '';
+                        $text = trim($node->text(''));
+
+                        if (strpos($href, '//') === 0) {
+                            $href = 'https:' . $href;
+                        } elseif ($href && !preg_match('/^https?:/i', $href)) {
+                            $href = rtrim($base, '/') . '/' . ltrim($href, '/');
+                        }
+
+                        // Require URL to contain the inferred slug if available to avoid picking unrelated links
+                        if ($slug && stripos($href, $slug) === false) {
+                            return;
+                        }
+
+                        $number = $this->extractEpisodeNumber($text . ' ' . $href);
+
+                        if ($number) {
+                            foreach ($episodes as $ep) {
+                                if ($ep['number'] === $number) {
+                                    return; // already captured
+                                }
+                            }
+
+                            $episodes[] = [
+                                'number' => $number,
+                                'title' => !empty($text) ? $text : "Episode {$number}",
+                                'url' => $href,
+                            ];
+                        }
+                    } catch (\Exception $e) {
+                        // ignore node-level errors
+                    }
+                });
+            } catch (\Exception $e) {
+                \Log::warning('AnimeSail: fallback DOM parse failed: ' . $e->getMessage());
             }
         }
 
@@ -672,12 +722,15 @@ class AnimeSailService
      */
     protected function extractEpisodeNumber($text)
     {
-        if (preg_match('/(?:episode|ep)[-_\s]*(\d+)/i', $text, $matches)) {
-            return (int)$matches[1];
+        // Prefer explicit episode markers like "episode 12" or "ep12"
+        if (preg_match('/(?:episode|ep)[-?_\s]*(\d+)/i', $text, $matches)) {
+            return (int) $matches[1];
         }
-        
-        if (preg_match('/\b0*(\d+)\b/', $text, $matches)) {
-            return (int)$matches[1];
+
+        // Fallback: pick the last number token (avoids grabbing "Movie 3" instead of the episode "1")
+        if (preg_match_all('/\d+/', $text, $all) && !empty($all[0])) {
+            $last = end($all[0]);
+            return (int) $last;
         }
 
         return null;

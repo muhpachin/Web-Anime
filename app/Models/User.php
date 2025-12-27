@@ -68,4 +68,20 @@ class User extends Authenticatable implements FilamentUser
     {
         return (bool) $this->is_admin;
     }
+    
+    /**
+     * Get the comments for the user.
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+    
+    /**
+     * Get the watch histories for the user.
+     */
+    public function watchHistories()
+    {
+        return $this->hasMany(WatchHistory::class);
+    }
 }

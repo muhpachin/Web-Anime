@@ -93,8 +93,8 @@
                     >
                     <span class="text-xs text-gray-400 group-hover:text-gray-300 transition">
                         Saya setuju dengan 
-                        <a href="#" class="text-red-500 hover:text-red-400">Terms of Service</a> dan 
-                        <a href="#" class="text-red-500 hover:text-red-400">Privacy Policy</a>
+                        <a href="{{ route('terms') }}" class="text-red-500 hover:text-red-400">Terms of Service</a> dan 
+                        <a href="{{ route('privacy') }}" class="text-red-500 hover:text-red-400">Privacy Policy</a>
                     </span>
                 </label>
 

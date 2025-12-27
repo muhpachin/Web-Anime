@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  app:
+    image: webdevops/php-nginx:8.2-alpine
+    container_name: nipnime-app
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - ./storage:/app/storage
+      - ./public:/app/public
+    ports:
+      - "8080:80"
+    environment:
+      - WEB_DOCUMENT_ROOT=/app/public
+      - PHP_MEMORY_LIMIT=256M
+      - PHP_UPLOAD_MAX_FILESIZE=64M
+      - PHP_POST_MAX_SIZE=64M
+    depends_on:
+      - mysql
+    networks:
+      - nipnime-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: nipnime-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: nipnime_secret_password
+      MYSQL_DATABASE: web_anime
+      MYSQL_USER: nipnime
+      MYSQL_PASSWORD: nipnime_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./anime_db_backup.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3307:3306"
+    networks:
+      - nipnime-network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: nipnime-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 100M
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - nipnime-network
+
+networks:
+  nipnime-network:
+    driver: bridge
+
+volumes:
+  mysql_data:

@@ -46,6 +46,9 @@ class MalSyncJob implements ShouldQueue
             if ($this->payload['syncType'] === 'search' && $this->payload['searchQuery']) {
                 $this->append($key, '🔍 Searching: ' . $this->payload['searchQuery']);
             }
+            if ($this->payload['syncType'] === 'mal_id' && !empty($this->payload['malId'])) {
+                $this->append($key, '🔢 MAL ID: ' . $this->payload['malId']);
+            }
             if ($this->payload['syncType'] === 'seasonal') {
                 if ($this->payload['season'] === 'all') {
                     $this->append($key, '📅 Season: All Seasons');
@@ -73,6 +76,15 @@ class MalSyncJob implements ShouldQueue
                     $season,
                     $limit
                 );
+            } elseif ($syncType === 'mal_id') {
+                // Fetch single anime by MAL ID
+                $malId = (int) $this->payload['malId'];
+                $animeData = $malService->getAnimeDetails($malId);
+                if ($animeData) {
+                    $animeList = [$animeData];
+                } else {
+                    throw new \Exception("Anime dengan MAL ID {$malId} tidak ditemukan.");
+                }
             } else {
                 $animeList = $malService->searchAnime($this->payload['searchQuery'], $limit);
             }

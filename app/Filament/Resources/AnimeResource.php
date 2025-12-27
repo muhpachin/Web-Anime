@@ -100,7 +100,8 @@ class AnimeResource extends Resource
                     ->label('Poster')
                     ->width(50)
                     ->height(75)
-                    ->getStateUsing(fn ($record) => $record->poster_image ? 'storage/' . $record->poster_image : null),
+                    ->url(fn ($record) => $record->poster_image ? asset('storage/' . $record->poster_image) : null)
+                    ->getStateUsing(fn ($record) => $record->poster_image ? asset('storage/' . $record->poster_image) : null),
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
                     ->sortable()

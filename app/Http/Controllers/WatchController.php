@@ -13,7 +13,13 @@ class WatchController extends Controller
      */
     public function show(Episode $episode)
     {
-        $episode->load('anime.genres', 'videoServers');
+        // Load episode with active video servers
+        $episode = Episode::where('id', $episode->id)->with([
+            'anime.genres',
+            'videoServers' => function($q) {
+                $q->where('is_active', true);
+            }
+        ])->firstOrFail();
 
         // Track watch history for logged in users
         if (auth()->check()) {

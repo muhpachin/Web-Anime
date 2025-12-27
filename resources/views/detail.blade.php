@@ -12,19 +12,19 @@
             <div class="absolute inset-0 bg-gradient-to-r from-[#0f1115] via-[#0f1115]/50 to-transparent"></div>
         </div>
 
-        <div class="relative max-w-7xl mx-auto px-4 py-16">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 items-start">
+        <div class="relative max-w-7xl mx-auto px-4 py-8 sm:py-16">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-12 items-start">
                 <!-- Poster -->
                 <div class="md:col-span-1">
-                    <div class="sticky top-28">
+                    <div class="md:sticky md:top-28 flex flex-col items-center md:items-stretch">
                         <img src="{{ $anime->poster_image ? asset('storage/' . $anime->poster_image) : asset('images/placeholder.png') }}" 
                              alt="{{ $anime->title }}"
-                             class="w-full rounded-2xl shadow-2xl shadow-black/50 border-2 border-white/10 hover:border-red-600/50 transition-all bg-gray-800">
+                             class="w-48 sm:w-64 md:w-full rounded-2xl shadow-2xl shadow-black/50 border-2 border-white/10 hover:border-red-600/50 transition-all bg-gray-800">
                         @if($anime->episodes->count() > 0)
                             <a href="{{ route('watch', $anime->episodes->first()) }}" 
-                               class="mt-6 w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-red-600/30 uppercase tracking-wide">
-                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
-                                Tonton Sekarang
+                               class="mt-4 sm:mt-6 w-full flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-red-600/30 uppercase tracking-wide text-sm sm:text-base">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+                                Tonton
                             </a>
                         @endif
                     </div>
@@ -33,49 +33,49 @@
                 <!-- Info -->
                 <div class="md:col-span-3">
                     <!-- Breadcrumb -->
-                    <div class="flex items-center gap-2 mb-6 text-sm text-gray-400">
+                    <div class="flex items-center gap-2 mb-4 sm:mb-6 text-xs sm:text-sm text-gray-400 overflow-x-auto whitespace-nowrap pb-2">
                         <a href="{{ route('home') }}" class="hover:text-red-500 transition">Home</a>
                         <span>/</span>
                         <a href="{{ route('search') }}" class="hover:text-red-500 transition">Anime</a>
                         <span>/</span>
-                        <span class="text-white font-semibold line-clamp-1">{{ $anime->title }}</span>
+                        <span class="text-white font-semibold truncate max-w-[150px] sm:max-w-none">{{ $anime->title }}</span>
                     </div>
 
                     <!-- Title & Status -->
-                    <h1 class="text-5xl md:text-6xl font-black text-white mb-6 leading-tight uppercase tracking-tight">
+                    <h1 class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight uppercase tracking-tight">
                         {{ $anime->title }}
                     </h1>
 
                     <!-- Stats Badges -->
-                    <div class="flex flex-wrap gap-3 mb-8">
-                        <div class="px-5 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-black rounded-xl shadow-lg shadow-red-600/30 text-sm uppercase tracking-wider">
+                    <div class="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
+                        <div class="px-3 sm:px-5 py-2 sm:py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-black rounded-lg sm:rounded-xl shadow-lg shadow-red-600/30 text-xs sm:text-sm uppercase tracking-wider">
                             {{ $anime->type }}
                         </div>
-                        <div class="px-5 py-3 bg-white/10 border border-white/20 text-white font-semibold rounded-xl backdrop-blur-sm text-sm uppercase tracking-wider">
+                        <div class="px-3 sm:px-5 py-2 sm:py-3 bg-white/10 border border-white/20 text-white font-semibold rounded-lg sm:rounded-xl backdrop-blur-sm text-xs sm:text-sm uppercase tracking-wider">
                             {{ $anime->status }}
                         </div>
-                        <div class="px-5 py-3 bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 font-black rounded-xl text-sm uppercase tracking-wider">
-                            ⭐ {{ number_format($anime->rating, 1) }}/10
+                        <div class="px-3 sm:px-5 py-2 sm:py-3 bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 font-black rounded-lg sm:rounded-xl text-xs sm:text-sm uppercase tracking-wider">
+                            ⭐ {{ number_format($anime->rating, 1) }}
                         </div>
                         @if($anime->release_year)
-                            <div class="px-5 py-3 bg-white/10 border border-white/20 text-gray-300 font-semibold rounded-xl backdrop-blur-sm text-sm">
+                            <div class="px-3 sm:px-5 py-2 sm:py-3 bg-white/10 border border-white/20 text-gray-300 font-semibold rounded-lg sm:rounded-xl backdrop-blur-sm text-xs sm:text-sm">
                                 📅 {{ $anime->release_year }}
                             </div>
                         @endif
                         @if($anime->episodes->count() > 0)
-                            <div class="px-5 py-3 bg-white/10 border border-white/20 text-gray-300 font-semibold rounded-xl backdrop-blur-sm text-sm">
-                                📺 {{ $anime->episodes->count() }} Episode
+                            <div class="px-3 sm:px-5 py-2 sm:py-3 bg-white/10 border border-white/20 text-gray-300 font-semibold rounded-lg sm:rounded-xl backdrop-blur-sm text-xs sm:text-sm">
+                                📺 {{ $anime->episodes->count() }} Eps
                             </div>
                         @endif
                     </div>
 
                     <!-- Genres -->
-                    <div class="mb-8">
-                        <p class="text-gray-400 text-xs font-black uppercase tracking-widest mb-3">🎭 Genre</p>
+                    <div class="mb-6 sm:mb-8">
+                        <p class="text-gray-400 text-xs font-black uppercase tracking-widest mb-2 sm:mb-3">🎭 Genre</p>
                         <div class="flex flex-wrap gap-2">
                             @foreach($anime->genres as $genre)
                                 <a href="{{ route('search', ['genre' => $genre->id]) }}" 
-                                   class="px-4 py-2 bg-gradient-to-r from-red-600/20 to-red-700/20 hover:from-red-600 hover:to-red-700 text-red-400 hover:text-white border border-red-600/30 hover:border-red-600 rounded-lg transition-all text-sm font-bold uppercase tracking-wider">
+                                   class="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-red-600/20 to-red-700/20 hover:from-red-600 hover:to-red-700 text-red-400 hover:text-white border border-red-600/30 hover:border-red-600 rounded-lg transition-all text-xs sm:text-sm font-bold uppercase tracking-wider">
                                     {{ $genre->name }}
                                 </a>
                             @endforeach
@@ -379,3 +379,4 @@
             animation: fadeInUp 0.6s ease-out;
         }
     </style>
+@endsection

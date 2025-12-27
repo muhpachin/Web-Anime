@@ -2,46 +2,47 @@
 @section('title', 'Nonton ' . $episode->anime->title . ' Ep ' . $episode->episode_number)
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 py-8">
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+<div class="max-w-7xl mx-auto px-4 py-4 sm:py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-8">
         <div class="lg:col-span-3">
-            <div class="rounded-2xl overflow-hidden shadow-2xl bg-black aspect-video border border-white/5 mb-8">
+            {{-- Video Player with Server Selector --}}
+            <div class="mb-4 sm:mb-8">
                 @livewire('video-player', ['episode' => $episode])
             </div>
 
-            <div class="bg-[#1a1d24] rounded-2xl p-8 border border-white/5">
-                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-                    <h1 class="text-3xl font-black text-white tracking-tight">
+            <div class="bg-[#1a1d24] rounded-xl sm:rounded-2xl p-4 sm:p-8 border border-white/5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+                    <h1 class="text-xl sm:text-3xl font-black text-white tracking-tight">
                         {{ $episode->anime->title }} <span class="text-red-600">- Ep {{ $episode->episode_number }}</span>
                     </h1>
                     <div class="flex gap-2">
-                        <button class="px-4 py-2 bg-[#2a2e38] hover:bg-red-600 text-white text-xs font-bold rounded-lg transition">PREV</button>
-                        <button class="px-4 py-2 bg-[#2a2e38] hover:bg-red-600 text-white text-xs font-bold rounded-lg transition">NEXT</button>
+                        <button class="flex-1 sm:flex-none px-4 py-2 bg-[#2a2e38] hover:bg-red-600 text-white text-xs font-bold rounded-lg transition">PREV</button>
+                        <button class="flex-1 sm:flex-none px-4 py-2 bg-[#2a2e38] hover:bg-red-600 text-white text-xs font-bold rounded-lg transition">NEXT</button>
                     </div>
                 </div>
-                <p class="text-gray-400 leading-relaxed italic border-l-4 border-red-600 pl-4">{{ $episode->description }}</p>
+                <p class="text-gray-400 leading-relaxed italic border-l-4 border-red-600 pl-4 text-sm sm:text-base">{{ $episode->description }}</p>
             </div>
 
             <!-- Comments Section -->
-            <div class="mt-8 bg-[#1a1d24] rounded-2xl p-6 border border-white/5">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-1.5 h-8 bg-gradient-to-b from-red-600 to-red-700 rounded-full"></div>
+            <div class="mt-4 sm:mt-8 bg-[#1a1d24] rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/5">
+                <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                    <div class="w-1 sm:w-1.5 h-6 sm:h-8 bg-gradient-to-b from-red-600 to-red-700 rounded-full"></div>
                     <div>
-                        <h2 class="text-2xl font-black text-white uppercase tracking-tight">Komentar Episode</h2>
-                        <p class="text-gray-400 text-sm mt-1">{{ $comments->total() }} komentar</p>
+                        <h2 class="text-lg sm:text-2xl font-black text-white uppercase tracking-tight">Komentar</h2>
+                        <p class="text-gray-400 text-xs sm:text-sm mt-0.5 sm:mt-1">{{ $comments->total() }} komentar</p>
                     </div>
                 </div>
 
                 @auth
-                <div class="mb-6">
-                    <form action="{{ route('comments.store') }}" method="POST" class="space-y-3">
+                <div class="mb-4 sm:mb-6">
+                    <form action="{{ route('comments.store') }}" method="POST" class="space-y-2 sm:space-y-3">
                         @csrf
                         <input type="hidden" name="anime_id" value="{{ $episode->anime_id }}">
                         <input type="hidden" name="episode_id" value="{{ $episode->id }}">
-                        <textarea name="comment" rows="3" placeholder="Tulis komentar kamu di sini..." class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-500 focus:border-red-600 focus:ring-2 focus:ring-red-600/50 focus:outline-none transition-all" required maxlength="1000"></textarea>
+                        <textarea name="comment" rows="3" placeholder="Tulis komentar kamu di sini..." class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/5 border border-white/20 rounded-xl text-white text-sm placeholder-gray-500 focus:border-red-600 focus:ring-2 focus:ring-red-600/50 focus:outline-none transition-all" required maxlength="1000"></textarea>
                         <div class="flex items-center justify-between">
-                            <p class="text-gray-500 text-xs">Maksimal 1000 karakter</p>
-                            <button type="submit" class="px-5 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold rounded-lg transition-all">Kirim Komentar</button>
+                            <p class="text-gray-500 text-xs hidden sm:block">Maksimal 1000 karakter</p>
+                            <button type="submit" class="w-full sm:w-auto px-4 sm:px-5 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-sm font-bold rounded-lg transition-all">Kirim Komentar</button>
                         </div>
                     </form>
                 </div>

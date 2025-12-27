@@ -14,10 +14,16 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // Continue watching for logged in users
+        // Continue watching for logged in users - group by anime (show only latest episode per anime)
         $continueWatching = null;
         if (auth()->check()) {
-            $continueWatching = WatchHistory::where('user_id', auth()->id())
+            // Get the latest watched episode per anime
+            $latestPerAnime = WatchHistory::where('user_id', auth()->id())
+                ->select('anime_id', \DB::raw('MAX(id) as latest_id'))
+                ->groupBy('anime_id')
+                ->pluck('latest_id');
+            
+            $continueWatching = WatchHistory::whereIn('id', $latestPerAnime)
                 ->with(['episode.anime.genres', 'anime.genres'])
                 ->orderBy('last_watched_at', 'desc')
                 ->limit(6)

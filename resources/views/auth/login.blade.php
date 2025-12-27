@@ -109,7 +109,7 @@
 
         <!-- Footer Note -->
         <div class="text-center mt-8 text-xs text-gray-500">
-            <p>Dengan masuk, Anda menyetujui <a href="#" class="text-red-500 hover:text-red-400">Terms of Service</a> dan <a href="#" class="text-red-500 hover:text-red-400">Privacy Policy</a></p>
+            <p>Dengan masuk, Anda menyetujui <a href="{{ route('terms') }}" class="text-red-500 hover:text-red-400">Terms of Service</a> dan <a href="{{ route('privacy') }}" class="text-red-500 hover:text-red-400">Privacy Policy</a></p>
         </div>
     </div>
 </div>

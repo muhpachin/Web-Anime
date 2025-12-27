@@ -9,6 +9,8 @@ use App\Http\Controllers\VideoProxyController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\AnimeRequestController;
+use App\Http\Controllers\PageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +29,13 @@ Route::get('/search', [HomeController::class, 'search'])->name('search');
 Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule');
 Route::get('/anime/{anime:slug}', [DetailController::class, 'show'])->name('detail');
 Route::get('/watch/{episode:slug}', [WatchController::class, 'show'])->name('watch');
+
+// Legal Pages
+Route::get('/dmca', [PageController::class, 'dmca'])->name('dmca');
+Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');
+Route::get('/terms', [PageController::class, 'terms'])->name('terms');
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::post('/contact', [PageController::class, 'sendContact'])->name('contact.send');
 
 // Video Proxy Routes
 Route::get('/api/video/proxy/animesail/{playerType}', [VideoProxyController::class, 'proxyAnimeSail'])->name('video.proxy.animesail');
@@ -53,4 +62,9 @@ Route::middleware('auth')->group(function () {
     
     // Watch Progress
     Route::post('/watch/{episode:slug}/progress', [WatchController::class, 'updateProgress'])->name('watch.progress');
+    
+    // Anime Request Routes
+    Route::get('/request', [AnimeRequestController::class, 'index'])->name('request.index');
+    Route::post('/request', [AnimeRequestController::class, 'store'])->name('request.store');
+    Route::post('/request/{animeRequest}/vote', [AnimeRequestController::class, 'vote'])->name('request.vote');
 });

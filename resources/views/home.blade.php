@@ -6,7 +6,7 @@
 <div class="bg-gradient-to-b from-[#0f1115] via-[#0f1115] to-[#1a1d24] min-h-screen text-gray-200 font-sans">
     
     @if($featuredAnimes->count() > 0)
-    <div class="relative h-[500px] w-full overflow-hidden group">
+    <div class="relative h-[300px] sm:h-[400px] md:h-[500px] w-full overflow-hidden group">
         <div class="absolute inset-0">
             <img src="{{ $featuredAnimes[0]->poster_image ? asset('storage/' . $featuredAnimes[0]->poster_image) : asset('images/placeholder.png') }}" 
                  alt="{{ $featuredAnimes[0]->title }}"
@@ -17,33 +17,34 @@
         
         <div class="relative max-w-7xl mx-auto px-4 h-full flex items-center">
             <div class="max-w-3xl animate-fadeInUp">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-1.5 h-8 bg-gradient-to-b from-red-600 to-red-700 rounded-full"></div>
-                    <span class="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-xs font-black rounded-full tracking-widest uppercase shadow-lg shadow-red-600/30">⭐ Spotlight Hari Ini</span>
+                <div class="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-6">
+                    <div class="w-1 sm:w-1.5 h-6 sm:h-8 bg-gradient-to-b from-red-600 to-red-700 rounded-full"></div>
+                    <span class="px-2 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-red-600 to-red-700 text-[10px] sm:text-xs font-black rounded-full tracking-widest uppercase shadow-lg shadow-red-600/30">⭐ Spotlight</span>
                 </div>
-                <h1 class="text-6xl md:text-7xl font-black text-white mb-6 leading-tight drop-shadow-2xl uppercase tracking-tight">{{ $featuredAnimes[0]->title }}</h1>
-                <p class="text-gray-300 line-clamp-2 mb-8 text-lg leading-relaxed max-w-2xl">{{ $featuredAnimes[0]->synopsis }}</p>
-                <div class="flex gap-4 flex-wrap">
-                    <a href="{{ route('detail', $featuredAnimes[0]) }}" class="px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black rounded-xl transition-all transform hover:scale-105 hover:shadow-xl hover:shadow-red-600/40 flex items-center gap-2 uppercase tracking-wide shadow-lg">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
-                        Tonton Sekarang
+                <h1 class="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-white mb-2 sm:mb-6 leading-tight drop-shadow-2xl uppercase tracking-tight line-clamp-2">{{ $featuredAnimes[0]->title }}</h1>
+                <p class="text-gray-300 line-clamp-2 mb-4 sm:mb-8 text-sm sm:text-lg leading-relaxed max-w-2xl hidden sm:block">{{ $featuredAnimes[0]->synopsis }}</p>
+                <div class="flex gap-2 sm:gap-4 flex-wrap">
+                    <a href="{{ route('detail', $featuredAnimes[0]) }}" class="px-4 sm:px-8 py-2 sm:py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black rounded-lg sm:rounded-xl transition-all transform hover:scale-105 hover:shadow-xl hover:shadow-red-600/40 flex items-center gap-2 uppercase tracking-wide shadow-lg text-xs sm:text-base">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+                        <span class="hidden sm:inline">Tonton Sekarang</span>
+                        <span class="sm:hidden">Tonton</span>
                     </a>
-                    <a href="{{ route('detail', $featuredAnimes[0]) }}" class="px-8 py-4 bg-white/10 hover:bg-white/20 border-2 border-white/30 text-white font-bold rounded-xl transition-all backdrop-blur-sm uppercase tracking-wide">
-                        Lihat Detail
+                    <a href="{{ route('detail', $featuredAnimes[0]) }}" class="px-4 sm:px-8 py-2 sm:py-4 bg-white/10 hover:bg-white/20 border border-white/30 sm:border-2 text-white font-bold rounded-lg sm:rounded-xl transition-all backdrop-blur-sm uppercase tracking-wide text-xs sm:text-base">
+                        Detail
                     </a>
                 </div>
-                <div class="flex items-center gap-6 mt-8 pt-8 border-t border-white/10">
+                <div class="flex items-center gap-4 sm:gap-6 mt-4 sm:mt-8 pt-4 sm:pt-8 border-t border-white/10 hidden sm:flex">
                     <div>
-                        <span class="text-3xl font-black text-red-500">★</span>
-                        <p class="text-sm text-gray-400">{{ number_format($featuredAnimes[0]->rating, 1) }}/10</p>
+                        <span class="text-xl sm:text-3xl font-black text-red-500">★</span>
+                        <p class="text-xs sm:text-sm text-gray-400">{{ number_format($featuredAnimes[0]->rating, 1) }}/10</p>
                     </div>
                     <div>
-                        <span class="text-2xl font-black text-white">{{ $featuredAnimes[0]->release_year }}</span>
-                        <p class="text-sm text-gray-400">Tahun Rilis</p>
+                        <span class="text-lg sm:text-2xl font-black text-white">{{ $featuredAnimes[0]->release_year }}</span>
+                        <p class="text-xs sm:text-sm text-gray-400">Tahun Rilis</p>
                     </div>
                     <div>
-                        <span class="text-2xl font-black text-white">{{ $featuredAnimes[0]->episodes->count() }}</span>
-                        <p class="text-sm text-gray-400">Episode</p>
+                        <span class="text-lg sm:text-2xl font-black text-white">{{ $featuredAnimes[0]->episodes->count() }}</span>
+                        <p class="text-xs sm:text-sm text-gray-400">Episode</p>
                     </div>
                 </div>
             </div>
@@ -51,24 +52,24 @@
     </div>
     @endif
 
-    <div class="max-w-7xl mx-auto px-4 py-16">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <div class="max-w-7xl mx-auto px-4 py-8 sm:py-16">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
             
             <!-- Main Content -->
             <div class="lg:col-span-3">
                 @auth
                     @if(isset($continueWatching) && $continueWatching->count() > 0)
                     <!-- Continue Watching Section -->
-                    <div class="mb-16">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-1.5 h-10 bg-gradient-to-b from-purple-600 to-purple-700 rounded-full"></div>
+                    <div class="mb-10 sm:mb-16">
+                        <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                            <div class="w-1 sm:w-1.5 h-8 sm:h-10 bg-gradient-to-b from-purple-600 to-purple-700 rounded-full"></div>
                             <div>
-                                <h2 class="text-4xl font-black text-white uppercase tracking-tight">Lanjutkan Tonton</h2>
-                                <p class="text-gray-400 text-sm mt-1">Melanjutkan dari terakhir kali kamu nonton</p>
+                                <h2 class="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight">Lanjutkan Tonton</h2>
+                                <p class="text-gray-400 text-xs sm:text-sm mt-1">Melanjutkan dari terakhir kali kamu nonton</p>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
                             @foreach($continueWatching as $history)
                                 @php
                                     $anime = $history->anime;

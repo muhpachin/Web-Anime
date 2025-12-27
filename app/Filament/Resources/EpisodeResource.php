@@ -156,6 +156,155 @@ class EpisodeResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\BulkAction::make('bulk_sync_servers')
+                    ->label('Bulk Sync Servers')
+                    ->icon('heroicon-o-refresh')
+                    ->color('success')
+                    ->form([
+                        Forms\Components\Textarea::make('html_content')
+                            ->label('HTML Content (untuk semua episode)')
+                            ->rows(6)
+                            ->placeholder('Paste HTML halaman yang berisi video servers...')
+                            ->helperText('Opsional: Paste HTML yang sama untuk semua episode yang dipilih'),
+                        Forms\Components\FileUpload::make('html_files')
+                            ->label('Upload HTML Files (per episode)')
+                            ->multiple()
+                            ->acceptedFileTypes(['text/html', 'text/plain', '.html', '.htm', '.txt'])
+                            ->directory('uploads/bulk-html')
+                            ->helperText('Upload file HTML per episode. Jika jumlah file = jumlah episode yang dipilih, akan dicocokkan urut. Atau nama file mengandung "Episode X" / "Ep X".'),
+                        Forms\Components\Toggle::make('delete_existing')
+                            ->label('Hapus server lama yang tidak ditemukan')
+                            ->default(false),
+                    ])
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records, array $data) {
+                        $service = app(\App\Services\AnimeSailService::class);
+                        $globalHtml = $data['html_content'] ?? '';
+                        $htmlFiles = $data['html_files'] ?? [];
+                        
+                        // Build episode number to HTML mapping from uploaded files
+                        $episodeHtmlMap = [];
+                        $fileContents = []; // Store all file contents for fallback
+                        
+                        foreach ($htmlFiles as $file) {
+                            $path = storage_path('app/public/' . $file);
+                            if (is_file($path)) {
+                                $filename = basename($file);
+                                $content = file_get_contents($path);
+                                $fileContents[] = $content;
+                                
+                                // Try to extract episode number from filename
+                                // Pattern: "Episode X", "Ep X", "EP-X", "episode_X", or just "X" at the end
+                                if (preg_match('/[Ee]p(?:isode)?[\s\-_]*(\d+)/i', $filename, $matches)) {
+                                    $epNum = (int) $matches[1];
+                                    $episodeHtmlMap[$epNum] = $content;
+                                } elseif (preg_match('/(\d+)(?:\.[^.]+)?$/', $filename, $matches)) {
+                                    // Number at end of filename before extension
+                                    $epNum = (int) $matches[1];
+                                    $episodeHtmlMap[$epNum] = $content;
+                                }
+                            }
+                        }
+                        
+                        if (empty($globalHtml) && empty($episodeHtmlMap) && empty($fileContents)) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('HTML Required')
+                                ->danger()
+                                ->body('Mohon paste HTML atau upload file HTML terlebih dahulu.')
+                                ->send();
+                            return;
+                        }
+                        
+                        $totalCreated = 0;
+                        $totalUpdated = 0;
+                        $processedEpisodes = 0;
+                        $skippedEpisodes = 0;
+                        
+                        // If we have files but couldn't map them, use them in order
+                        $fileIndex = 0;
+                        $recordsList = $records->sortBy('episode_number')->values();
+                        
+                        foreach ($recordsList as $episode) {
+                            // Determine which HTML to use for this episode
+                            $html = null;
+                            
+                            // Priority 1: Specific HTML file for this episode number
+                            if (isset($episodeHtmlMap[$episode->episode_number])) {
+                                $html = $episodeHtmlMap[$episode->episode_number];
+                            }
+                            // Priority 2: Use files in order (if same count as selected episodes)
+                            elseif (!empty($fileContents) && count($fileContents) === $recordsList->count()) {
+                                $html = $fileContents[$fileIndex] ?? null;
+                                $fileIndex++;
+                            }
+                            // Priority 3: Global HTML (same for all)
+                            elseif (!empty($globalHtml)) {
+                                $html = $globalHtml;
+                            }
+                            // Priority 4: Use any available file content
+                            elseif (!empty($fileContents)) {
+                                $html = $fileContents[$fileIndex % count($fileContents)] ?? null;
+                                $fileIndex++;
+                            }
+                            
+                            if (empty($html)) {
+                                $skippedEpisodes++;
+                                continue;
+                            }
+                            
+                            $servers = $service->getEpisodeServersFromHtml($html);
+                            
+                            if (empty($servers)) {
+                                $skippedEpisodes++;
+                                continue;
+                            }
+                            
+                            // Optional delete existing
+                            if (!empty($data['delete_existing'])) {
+                                $keepUrls = collect($servers)->pluck('url')->unique()->values()->all();
+                                if (!empty($keepUrls)) {
+                                    \App\Models\VideoServer::where('episode_id', $episode->id)
+                                        ->whereNotIn('embed_url', $keepUrls)
+                                        ->delete();
+                                }
+                            }
+                            
+                            foreach ($servers as $serverData) {
+                                $embedCode = \App\Services\VideoEmbedHelper::toEmbedCode(
+                                    $serverData['url'],
+                                    $serverData['name'] ?? null
+                                );
+                                
+                                $vs = \App\Models\VideoServer::updateOrCreate(
+                                    [
+                                        'episode_id' => $episode->id,
+                                        'embed_url' => $serverData['url'],
+                                    ],
+                                    [
+                                        'server_name' => $serverData['name'] ?? 'Unknown',
+                                        'embed_url' => $embedCode,
+                                        'is_active' => true,
+                                    ]
+                                );
+                                if ($vs->wasRecentlyCreated) { $totalCreated++; } else { $totalUpdated++; }
+                            }
+                            $processedEpisodes++;
+                        }
+                        
+                        $message = "Processed: {$processedEpisodes} | Created: {$totalCreated} | Updated: {$totalUpdated}";
+                        if ($skippedEpisodes > 0) {
+                            $message .= " | Skipped: {$skippedEpisodes}";
+                        }
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('Bulk Sync Completed!')
+                            ->success()
+                            ->body($message)
+                            ->send();
+                    })
+                    ->deselectRecordsAfterCompletion()
+                    ->requiresConfirmation()
+                    ->modalHeading('Bulk Sync Video Servers')
+                    ->modalSubheading('Sync video servers untuk semua episode yang dipilih'),
             ]);
     }
     

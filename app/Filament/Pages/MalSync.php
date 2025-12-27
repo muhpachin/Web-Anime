@@ -32,6 +32,7 @@ class MalSync extends Page implements HasForms
     public $syncType = 'top';
     public $limit = 10;
     public $searchQuery = '';
+    public $malId = '';
     public $downloadImages = true;
     public $season = '';
     public $year = '';
@@ -51,6 +52,7 @@ class MalSync extends Page implements HasForms
                     'top' => '🏆 Top Anime (By Rating)',
                     'seasonal' => '📅 Seasonal Anime',
                     'search' => '🔍 Search Specific Anime',
+                    'mal_id' => '🔢 Search by MAL ID',
                 ])
                 ->required()
                 ->reactive()
@@ -62,6 +64,13 @@ class MalSync extends Page implements HasForms
                 ->required(fn ($get) => $get('syncType') === 'search')
                 ->placeholder('e.g., Naruto, One Piece')
                 ->helperText('Enter anime title to search'),
+            
+            TextInput::make('malId')
+                ->label('MAL ID')
+                ->visible(fn ($get) => $get('syncType') === 'mal_id')
+                ->required(fn ($get) => $get('syncType') === 'mal_id')
+                ->placeholder('e.g., 21 (One Piece), 16498 (Attack on Titan)')
+                ->helperText('Enter MyAnimeList anime ID (from URL: myanimelist.net/anime/ID)'),
             
             Select::make('season')
                 ->label('Season')
@@ -123,6 +132,7 @@ class MalSync extends Page implements HasForms
             'syncType' => $this->syncType,
             'limit' => $this->limit,
             'searchQuery' => $this->searchQuery,
+            'malId' => $this->malId,
             'season' => $this->season,
             'year' => $this->year,
             'downloadImages' => $this->downloadImages,

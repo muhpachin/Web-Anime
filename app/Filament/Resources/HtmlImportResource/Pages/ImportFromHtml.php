@@ -55,7 +55,6 @@ class ImportFromHtml extends Page implements Forms\Contracts\HasForms
         // Kirim file ZIP ke browser (download)
         return response()->download($zipPath)->deleteFileAfterSend(true);
     }
-{
     use Forms\Concerns\InteractsWithForms;
     use WithFileUploads;
 

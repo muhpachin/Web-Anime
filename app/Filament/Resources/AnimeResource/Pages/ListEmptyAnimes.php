@@ -11,22 +11,43 @@ class ListEmptyAnimes extends Page
     protected static string $resource = AnimeResource::class;
     protected static string $view = 'filament.resources.anime-resource.pages.list-empty-animes';
 
-    public $animes;
+    // Properti untuk menyimpan pilihan filter tahun
+    public $year = '';
 
-    public function mount()
+    // Fungsi untuk mengambil data anime berdasarkan filter
+    protected function getAnimes()
     {
-        // Query yang lebih detail untuk menghitung kondisi episode
-        $this->animes = Anime::withCount([
+        return Anime::withCount([
             'episodes', 
-            // Menghitung jumlah episode yang TIDAK punya video server
             'episodes as missing_video_count' => function ($query) {
                 $query->doesntHave('videoServers');
             }
         ])
-        ->whereDoesntHave('episodes')
-        ->orWhereHas('episodes', function($q) {
-            $q->doesntHave('videoServers');
+        ->where(function($query) {
+            $query->whereDoesntHave('episodes')
+                  ->orWhereHas('episodes', function($q) {
+                      $q->doesntHave('videoServers');
+                  });
         })
+        // Tambahkan filter tahun jika dipilih
+        ->when($this->year, fn ($query) => $query->where('release_year', $this->year))
         ->get();
+    }
+
+    // Mengambil daftar tahun unik untuk dropdown filter
+    protected function getAvailableYears()
+    {
+        return Anime::whereNotNull('release_year')
+            ->distinct()
+            ->orderBy('release_year', 'desc')
+            ->pluck('release_year');
+    }
+
+    protected function getViewData(): array
+    {
+        return [
+            'animes' => $this->getAnimes(),
+            'years' => $this->getAvailableYears(),
+        ];
     }
 }

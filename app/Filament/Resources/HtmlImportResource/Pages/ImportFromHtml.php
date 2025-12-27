@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
 
 class ImportFromHtml extends Page implements Forms\Contracts\HasForms
-
+{
     // Download all episode HTMLs as ZIP and return response
     public function downloadAllEpisodeHtmls()
     {

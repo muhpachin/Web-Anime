@@ -13,12 +13,10 @@
 </head>
 <body class="antialiased bg-[#0f1115] text-gray-300 font-['Inter'] overflow-x-hidden">
     
-    {{-- Navbar Utama --}}
     <nav class="bg-[#0f1115]/95 backdrop-blur-md border-b border-white/5 sticky top-0 z-50 shadow-xl shadow-black/40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 md:h-20">
                 
-                {{-- Logo & Menu Desktop --}}
                 <div class="flex items-center gap-3 md:gap-8">
                     <a href="{{ route('home') }}" class="group flex items-center gap-2 hover:scale-105 transition-transform shrink-0">
                         <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg shadow-red-600/20 group-hover:shadow-red-600/40 transition-all">
@@ -35,7 +33,6 @@
                     </div>
                 </div>
 
-                {{-- Kanan: Search, Profil, Toggle --}}
                 <div class="flex items-center gap-1 sm:gap-3 md:gap-6">
                     <form action="{{ route('search') }}" method="GET" class="hidden md:block relative group">
                         <input type="text" name="search" placeholder="Cari anime..." 
@@ -77,7 +74,6 @@
                         @endauth
                     </div>
 
-                    {{-- FIX #1: Toggle Holiday (Dihapus 'hidden' agar muncul di HP) --}}
                     @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
                     <div class="flex items-center border-l border-white/10 pl-2 ml-1 sm:pl-4">
                         <label class="relative inline-flex items-center cursor-pointer">
@@ -102,7 +98,6 @@
             </form>
         </div>
 
-        {{-- FIX #2: Mobile Menu dijadikan ABSOLUTE agar tidak mendorong layout & membuat blur meluas --}}
         <div id="mobileMenu" class="absolute top-full left-0 w-full lg:hidden bg-[#0f1115] border-t border-white/5 transition-all duration-500 ease-in-out max-h-0 opacity-0 overflow-hidden pointer-events-none transform -translate-y-4 shadow-2xl">
             <div class="p-4 space-y-1">
                 <a href="{{ route('home') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold {{ request()->routeIs('home') ? 'bg-red-600 text-white' : 'text-gray-400' }}">🏠 HOME</a>
@@ -125,7 +120,6 @@
         </div>
     </nav>
 
-    {{-- FIX #3: Added 'relative z-10' untuk memastikan konten tidak tertutup glitch background --}}
     <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-10 md:pt-4 min-h-[60vh]">
         @yield('content')
     </main>

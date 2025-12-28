@@ -124,7 +124,7 @@
                         @endif
 
                         <button id="mobileMenuBtn" class="lg:hidden p-2 text-gray-400 hover:text-white transition">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg id="burgerIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                             </svg>
                         </button>
@@ -133,7 +133,7 @@
             </div>
         </div>
 
-        <div id="mobileSearchBar" class="hidden lg:hidden px-4 pb-4">
+        <div id="mobileSearchBar" class="hidden lg:hidden px-4 pb-4 bg-[#0f1115]">
             <form action="{{ route('search') }}" method="GET" class="relative">
                 <input type="text" name="search" placeholder="Cari anime..." 
                        class="w-full bg-[#1a1d24] border-2 border-white/10 text-white rounded-full px-5 py-3 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-600/30 transition-all placeholder-gray-600">
@@ -145,28 +145,38 @@
             </form>
         </div>
 
-        <div id="mobileMenu" class="hidden lg:hidden absolute top-full left-0 w-full bg-[#0f1115] border-t border-white/10 shadow-2xl z-40">
+        <div id="mobileMenu" class="absolute top-full left-0 w-full bg-[#0f1115] border-t border-white/10 shadow-2xl z-40 transition-all duration-500 ease-in-out max-h-0 opacity-0 overflow-hidden pointer-events-none lg:hidden">
             <div class="px-4 py-4 space-y-2">
-                <a href="{{ route('home') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('home') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">
+                
+                <a href="{{ route('home') }}" style="transition-delay: 0ms;" 
+                   class="mobile-item block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-500 opacity-0 -translate-y-4 {{ request()->routeIs('home') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
                     🏠 Home
                 </a>
-                <a href="{{ route('search') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('search') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">
+                
+                <a href="{{ route('search') }}" style="transition-delay: 100ms;"
+                   class="mobile-item block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-500 opacity-0 -translate-y-4 {{ request()->routeIs('search') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
                     📺 Daftar Anime
                 </a>
-                <a href="{{ route('schedule') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('schedule') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">
+                
+                <a href="{{ route('schedule') }}" style="transition-delay: 200ms;"
+                   class="mobile-item block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-500 opacity-0 -translate-y-4 {{ request()->routeIs('schedule') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
                     📅 Jadwal
                 </a>
-                <a href="{{ route('search', ['type' => 'Movie']) }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider text-gray-300 hover:bg-white/10 transition">
+                
+                <a href="{{ route('search', ['type' => 'Movie']) }}" style="transition-delay: 300ms;"
+                   class="mobile-item block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-500 opacity-0 -translate-y-4 text-gray-300 hover:bg-white/10">
                     🎬 Movie
                 </a>
+                
                 @auth
-                <a href="{{ route('request.index') }}" class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider {{ request()->routeIs('request.*') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }} transition">
+                <a href="{{ route('request.index') }}" style="transition-delay: 400ms;"
+                   class="mobile-item block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-500 opacity-0 -translate-y-4 {{ request()->routeIs('request.*') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
                     📝 Request
                 </a>
                 @endauth
 
                 @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
-                <div class="pt-4 border-t border-white/10 mt-2">
+                <div style="transition-delay: 500ms;" class="mobile-item pt-4 border-t border-white/10 mt-2 transition-all duration-500 opacity-0 -translate-y-4">
                     <div class="flex items-center justify-between px-4 py-2 bg-white/5 rounded-xl">
                         <span class="text-xs font-bold uppercase text-gray-400">✨ Efek Visual</span>
                         <label class="relative inline-flex items-center cursor-pointer">
@@ -179,66 +189,6 @@
             </div>
         </div>
     </nav>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const profileButton = document.getElementById('profileButton');
-            const profileMenu = document.getElementById('profileMenu');
-            const profileDropdown = document.getElementById('profileDropdown');
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const mobileMenu = document.getElementById('mobileMenu');
-            const mobileSearchBtn = document.getElementById('mobileSearchBtn');
-            const mobileSearchBar = document.getElementById('mobileSearchBar');
-
-            // Profile dropdown toggle
-            if (profileButton && profileMenu) {
-                profileButton.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    profileMenu.classList.toggle('opacity-0');
-                    profileMenu.classList.toggle('invisible');
-                });
-
-                document.addEventListener('click', function(e) {
-                    if (profileDropdown && !profileDropdown.contains(e.target)) {
-                        profileMenu.classList.add('opacity-0', 'invisible');
-                    }
-                });
-
-                const profileLink = profileMenu.querySelector('a');
-                if (profileLink) {
-                    profileLink.addEventListener('click', function() {
-                        profileMenu.classList.add('opacity-0', 'invisible');
-                    });
-                }
-            }
-
-            // Mobile menu toggle
-            if (mobileMenuBtn && mobileMenu) {
-                mobileMenuBtn.addEventListener('click', function() {
-                    mobileMenu.classList.toggle('hidden');
-                    // Close search bar when opening menu
-                    if (mobileSearchBar && !mobileMenu.classList.contains('hidden')) {
-                        mobileSearchBar.classList.add('hidden');
-                    }
-                });
-            }
-
-            // Mobile search toggle
-            if (mobileSearchBtn && mobileSearchBar) {
-                mobileSearchBtn.addEventListener('click', function() {
-                    mobileSearchBar.classList.toggle('hidden');
-                    // Close menu when opening search
-                    if (mobileMenu && !mobileSearchBar.classList.contains('hidden')) {
-                        mobileMenu.classList.add('hidden');
-                    }
-                    // Focus on input
-                    if (!mobileSearchBar.classList.contains('hidden')) {
-                        mobileSearchBar.querySelector('input').focus();
-                    }
-                });
-            }
-        });
-    </script>
 
     <main class="relative z-0">@yield('content')</main>
 
@@ -291,9 +241,9 @@
                 </div>
             </div>
 
-            <div class="border-t border-white/10 pt-6 sm:pt-8">
-                <p class="text-gray-500 text-center text-xs sm:text-sm">
-                    © 2024 nipnime. All rights reserved. | Made with ❤️ for anime fans
+            <div class="border-t border-white/10 pt-6 sm:pt-8 text-center">
+                <p class="text-gray-500 text-xs sm:text-sm">
+                    © 2024 nipnime. All rights reserved. | Made with <span class="text-red-600">❤</span> for anime fans
                 </p>
             </div>
         </div>
@@ -301,6 +251,82 @@
 
     @livewireScripts
     @livewire('notifications')
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileButton = document.getElementById('profileButton');
+            const profileMenu = document.getElementById('profileMenu');
+            const profileDropdown = document.getElementById('profileDropdown');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const burgerIcon = document.getElementById('burgerIcon');
+            const mobileSearchBtn = document.getElementById('mobileSearchBtn');
+            const mobileSearchBar = document.getElementById('mobileSearchBar');
+
+            // Profile dropdown logic
+            if (profileButton && profileMenu) {
+                profileButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileMenu.classList.toggle('opacity-0');
+                    profileMenu.classList.toggle('invisible');
+                });
+                document.addEventListener('click', function(e) {
+                    if (profileDropdown && !profileDropdown.contains(e.target)) {
+                        profileMenu.classList.add('opacity-0', 'invisible');
+                    }
+                });
+            }
+
+            // Logic Animasi Menu Mobile (Satu per satu)
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    const isClosed = mobileMenu.classList.contains('max-h-0');
+                    const items = mobileMenu.querySelectorAll('.mobile-item');
+
+                    if (isClosed) {
+                        // 1. Buka Container
+                        mobileMenu.classList.remove('max-h-0', 'opacity-0', 'pointer-events-none');
+                        mobileMenu.classList.add('max-h-[500px]', 'opacity-100', 'pointer-events-auto');
+                        burgerIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>';
+                        
+                        // 2. Animasi Item muncul satu per satu
+                        items.forEach(item => {
+                            item.classList.remove('opacity-0', '-translate-y-4');
+                            item.classList.add('opacity-100', 'translate-y-0');
+                        });
+
+                        // Tutup search bar jika terbuka
+                        if (mobileSearchBar) mobileSearchBar.classList.add('hidden');
+                    } else {
+                        // 1. Reset Item (Hilang dulu)
+                        items.forEach(item => {
+                            item.classList.add('opacity-0', '-translate-y-4');
+                            item.classList.remove('opacity-100', 'translate-y-0');
+                        });
+
+                        // 2. Tutup Container
+                        mobileMenu.classList.add('max-h-0', 'opacity-0', 'pointer-events-none');
+                        mobileMenu.classList.remove('max-h-[500px]', 'opacity-100', 'pointer-events-auto');
+                        burgerIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>';
+                    }
+                });
+            }
+
+            // Search Toggle Logic
+            if (mobileSearchBtn && mobileSearchBar) {
+                mobileSearchBtn.addEventListener('click', function() {
+                    mobileSearchBar.classList.toggle('hidden');
+                    if (!mobileSearchBar.classList.contains('hidden')) {
+                        mobileSearchBar.querySelector('input').focus();
+                        // Tutup menu jika search dibuka
+                        if (mobileMenu && !mobileMenu.classList.contains('max-h-0')) {
+                            mobileMenuBtn.click(); // Trigger click untuk menutup menu dengan animasi
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 
     @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
         <div id="holiday-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 40;"></div>
@@ -325,43 +351,13 @@
     @endif
 
     <style>
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        main {
-            animation: fadeInUp 0.5s ease-out;
-        }
-
-        /* Smooth scroll behavior */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #0f1115;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #dc2626;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #b91c1c;
-        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        main { animation: fadeInUp 0.5s ease-out; }
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f1115; }
+        ::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #b91c1c; }
     </style>
 </body>
 </html>

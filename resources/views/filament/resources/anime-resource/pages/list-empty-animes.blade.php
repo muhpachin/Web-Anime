@@ -31,7 +31,7 @@
                                 @else
                                     <span class="text-orange-500 font-medium">{{ $anime->missing_video_count }} episode belum punya link video</span>
                                 @endif
-                                <span class="text-gray-400 ml-1">({{ $anime->release_year ?? 'Tahun TBD' }})</span>
+                                <span class="text-gray-400 ml-1">({{ $anime->release_year ?? '2025' }})</span>
                             </p>
                         </div>
                     </div>
@@ -41,6 +41,7 @@
                             size="sm"
                             color="secondary"
                             icon="heroicon-s-clipboard-copy"
+                            {{-- Memanggil fungsi JS --}}
                             onclick="copyToClipboard('{{ addslashes($anime->title) }}')"
                         >
                             Copy Judul
@@ -64,16 +65,18 @@
         </div>
     </div>
 
-    {{-- Script Copy dengan Notifikasi Filament Toast --}}
+    {{-- Script Copy dengan Dispatch Notifikasi Filament --}}
     <script>
         function copyToClipboard(text) {
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text).then(() => {
-                    new FilamentNotification()
-                        .title('Berhasil disalin!')
-                        .body('Judul "' + text + '" sudah ada di clipboard.')
-                        .success()
-                        .send();
+                    // Memicu notifikasi Toast Filament v3
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: {
+                            status: 'success',
+                            message: 'Berhasil disalin!',
+                        }
+                    }));
                 });
             } else {
                 let textArea = document.createElement("textarea");
@@ -86,15 +89,13 @@
                 textArea.select();
                 try {
                     document.execCommand('copy');
-                    new FilamentNotification()
-                        .title('Berhasil disalin!')
-                        .success()
-                        .send();
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { status: 'success', message: 'Berhasil disalin!' }
+                    }));
                 } catch (err) {
-                    new FilamentNotification()
-                        .title('Gagal menyalin')
-                        .danger()
-                        .send();
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { status: 'danger', message: 'Gagal menyalin!' }
+                    }));
                 }
                 document.body.removeChild(textArea);
             }

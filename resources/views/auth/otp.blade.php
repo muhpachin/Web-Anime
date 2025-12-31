@@ -39,7 +39,8 @@
                     </label>
                     <div class="mt-1 relative rounded-md shadow-sm">
                         <input id="otp" name="otp" type="text" maxlength="6" required autofocus
-                            class="appearance-none block w-full px-3 py-4 border border-gray-700 rounded-lg bg-[#0f0f0f] text-white placeholder-gray-500 text-center text-3xl tracking-[0.5em] font-bold focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-2xl transition duration-300"
+                            style="background-color: #1a1a1a !important; color: #ffffff !important; border-color: #4b5563;"
+                            class="appearance-none block w-full px-3 py-4 border border-gray-700 rounded-lg text-white placeholder-gray-500 text-center text-3xl tracking-[0.5em] font-bold focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-2xl transition duration-300"
                             placeholder="000000">
                     </div>
                 </div>

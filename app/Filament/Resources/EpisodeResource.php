@@ -188,18 +188,24 @@ class EpisodeResource extends Resource
                         
                         foreach ($htmlFiles as $file) {
                             $path = storage_path('app/public/' . $file);
+                            
                             if (is_file($path)) {
                                 $filename = basename($file);
                                 $content = file_get_contents($path);
-                                $fileContents[] = $content;
+                                $fileContents[] = $content; // Backup untuk fallback urutan
                                 
-                                // Try to extract episode number from filename
-                                // Pattern: "Episode X", "Ep X", "EP-X", "episode_X", or just "X" at the end
-                                if (preg_match('/[Ee]p(?:isode)?[\s\-_]*(\d+)/i', $filename, $matches)) {
+                                // --- LOGIKA KHUSUS FILE KAMU ---
+                                // Mencari kata "Episode" diikuti spasi dan angka
+                                // Cocok untuk: "Honey Lemon Soda Episode 5 – AnimeSail.html"
+                                if (preg_match('/Episode\s+(\d+)/i', $filename, $matches)) {
                                     $epNum = (int) $matches[1];
                                     $episodeHtmlMap[$epNum] = $content;
-                                } elseif (preg_match('/(\d+)(?:\.[^.]+)?$/', $filename, $matches)) {
-                                    // Number at end of filename before extension
+                                    
+                                    // Debugging (Opsional: Cek di laravel.log jika masih error)
+                                    // \Illuminate\Support\Facades\Log::info("Matched: $filename as Episode $epNum");
+                                } 
+                                // Jaga-jaga jika ada file yang cuma "Ep 5..."
+                                elseif (preg_match('/Ep(?:isode)?\.?\s*(\d+)/i', $filename, $matches)) {
                                     $epNum = (int) $matches[1];
                                     $episodeHtmlMap[$epNum] = $content;
                                 }

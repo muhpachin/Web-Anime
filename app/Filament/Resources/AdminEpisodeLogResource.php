@@ -156,17 +156,19 @@ class AdminEpisodeLogResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->color('info')
                     ->requiresConfirmation()
-                    ->visible(fn (AdminEpisodeLog $record) => $record->status === AdminEpisodeLog::STATUS_PENDING)
+                    ->visible(fn (AdminEpisodeLog $record) => (auth()->user()?->isSuperAdmin() ?? false) && $record->status === AdminEpisodeLog::STATUS_PENDING)
                     ->action(fn (AdminEpisodeLog $record) => $record->update(['status' => AdminEpisodeLog::STATUS_APPROVED])),
                 Tables\Actions\Action::make('markPaid')
                     ->label('Tandai Dibayar')
                     ->icon('heroicon-o-currency-dollar')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (AdminEpisodeLog $record) => $record->status !== AdminEpisodeLog::STATUS_PAID)
+                    ->visible(fn (AdminEpisodeLog $record) => (auth()->user()?->isSuperAdmin() ?? false) && $record->status !== AdminEpisodeLog::STATUS_PAID)
                     ->action(fn (AdminEpisodeLog $record) => $record->update(['status' => AdminEpisodeLog::STATUS_PAID])),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn () => auth()->user()?->isSuperAdmin() ?? false),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn () => auth()->user()?->isSuperAdmin() ?? false),
             ])
             ->bulkActions([
                 Tables\Actions\BulkAction::make('markPaid')
@@ -174,8 +176,10 @@ class AdminEpisodeLogResource extends Resource
                     ->icon('heroicon-o-currency-dollar')
                     ->color('success')
                     ->requiresConfirmation()
+                    ->visible(fn () => auth()->user()?->isSuperAdmin() ?? false)
                     ->action(fn ($records) => $records->each->update(['status' => AdminEpisodeLog::STATUS_PAID])),
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make()
+                    ->visible(fn () => auth()->user()?->isSuperAdmin() ?? false),
             ]);
     }
 

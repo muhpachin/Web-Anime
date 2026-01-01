@@ -165,7 +165,7 @@ class HomeController extends Controller
      */
     public function latestEpisodes()
     {
-        // Get latest episode per anime with their latest video server update time
+        // Get the latest episode number per anime with their latest video server update time
         $latestEpisodesData = \DB::table('episodes')
             ->join('animes', 'episodes.anime_id', '=', 'animes.id')
             ->join('video_servers', 'episodes.id', '=', 'video_servers.episode_id')
@@ -178,11 +178,41 @@ class HomeController extends Controller
             )
             ->groupBy('episodes.id', 'animes.id', 'episodes.episode_number')
             ->orderBy('latest_server_update', 'desc')
-            ->paginate(24);
+            ->get();
+
+        // Filter to get only the latest episode per anime
+        $latestPerAnime = [];
+        foreach ($latestEpisodesData as $row) {
+            // Keep only the first (latest) episode for each anime
+            if (!isset($latestPerAnime[$row->anime_id])) {
+                $latestPerAnime[$row->anime_id] = $row;
+            }
+        }
+
+        // Sort by latest_server_update and paginate
+        $paginatedData = collect($latestPerAnime)
+            ->sortBy('latest_server_update', SORT_REGULAR, true)
+            ->values();
+
+        // Manual pagination
+        $perPage = 24;
+        $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?? 1;
+        $items = $paginatedData->slice(($currentPage - 1) * $perPage, $perPage);
+
+        $pagination = new \Illuminate\Pagination\Paginator(
+            $items,
+            $perPage,
+            $currentPage,
+            [
+                'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(),
+                'query' => \Illuminate\Support\Facades\Request::query(),
+            ]
+        );
+        $pagination->setPageName('page');
 
         // Get episode IDs in order
-        $episodeIds = $latestEpisodesData->pluck('episode_id');
-        $episodeOrder = array_flip($episodeIds->toArray());
+        $episodeIds = $items->pluck('episode_id')->toArray();
+        $episodeOrder = array_flip($episodeIds);
 
         // Load episodes with their anime
         $episodes = Episode::whereIn('id', $episodeIds)
@@ -202,7 +232,7 @@ class HomeController extends Controller
 
         return view('latest-episodes', [
             'latestEpisodes' => $latestEpisodes,
-            'pagination' => $latestEpisodesData,
+            'pagination' => $pagination,
         ]);
     }
 }

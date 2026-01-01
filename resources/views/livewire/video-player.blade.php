@@ -1,7 +1,9 @@
 {{-- Video Player Component --}}
+@php($playerContainerId = 'player-shell-' . $episode->id)
 <div class="w-full space-y-4">
     {{-- Video Player Container --}}
-    <div class="theme-elevated rounded-lg overflow-hidden shadow-2xl aspect-video border theme-border">
+    <div class="relative group">
+        <div id="{{ $playerContainerId }}" class="theme-elevated rounded-lg overflow-hidden shadow-2xl aspect-video border theme-border">
         @if($selectedServer)
             @if(str_contains($selectedServer->embed_url, '<iframe'))
                 {{-- Handle Full Iframe Tags --}}
@@ -100,6 +102,17 @@
                 </div>
             </div>
         @endif
+        </div>
+        <button type="button"
+                class="absolute top-3 right-3 flex items-center gap-2 px-3 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg theme-elevated border theme-border shadow hover:scale-105 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                data-fullscreen-target="{{ $playerContainerId }}"
+                aria-label="Toggle fullscreen"
+                aria-pressed="false">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9V5h4M4 5l5 5M20 15v4h-4M20 19l-5-5M4 15v4h4M4 19l5-5M20 9V5h-4M20 5l-5 5" />
+            </svg>
+            <span class="hidden sm:inline">Fullscreen</span>
+        </button>
     </div>
 
     {{-- Server List --}}
@@ -133,3 +146,50 @@
         </div>
     @endif
 </div>
+    @once
+    @push('scripts')
+    <script>
+    (function(){
+        const exitFullscreen = () => {
+            const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen || document.mozCancelFullScreen;
+            if (exit) exit.call(document);
+        };
+
+        const enterFullscreen = (element) => {
+            if (!element) return;
+            const request = element.requestFullscreen || element.webkitRequestFullscreen || element.msRequestFullscreen || element.mozRequestFullScreen;
+            if (request) request.call(element);
+        };
+
+        document.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-fullscreen-target]');
+            if (!button) return;
+            event.preventDefault();
+            const target = document.getElementById(button.getAttribute('data-fullscreen-target'));
+            const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || document.mozFullScreenElement;
+            if (fullscreenElement === target) {
+                exitFullscreen();
+            } else {
+                enterFullscreen(target);
+            }
+        });
+
+        const syncButtonState = () => {
+            const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || document.mozFullScreenElement;
+            document.querySelectorAll('[data-fullscreen-target]').forEach((btn) => {
+                const targetId = btn.getAttribute('data-fullscreen-target');
+                const isActive = fullscreenElement && fullscreenElement.id === targetId;
+                btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                btn.classList.toggle('ring-2', isActive);
+                btn.classList.toggle('ring-red-500/60', isActive);
+            });
+        };
+
+        document.addEventListener('fullscreenchange', syncButtonState);
+        document.addEventListener('webkitfullscreenchange', syncButtonState);
+        document.addEventListener('msfullscreenchange', syncButtonState);
+        document.addEventListener('mozfullscreenchange', syncButtonState);
+    })();
+    </script>
+    @endpush
+    @endonce

@@ -200,7 +200,7 @@
     };
 
     // Initialize fullscreen handlers
-    document.addEventListener('DOMContentLoaded', function() {
+    function initFullscreenControls() {
         // Keyboard shortcut: Press F to toggle fullscreen
         document.addEventListener('keydown', function(event) {
             if (event.key.toLowerCase() === 'f' && !event.ctrlKey && !event.altKey && !event.metaKey) {
@@ -269,7 +269,13 @@
         
         // Initial UI update
         updateFullscreenUI();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFullscreenControls);
+    } else {
+        initFullscreenControls();
+    }
     </script>
     @endpush
     @endonce

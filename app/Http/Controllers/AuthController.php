@@ -122,6 +122,26 @@ class AuthController extends Controller
 
     public function resendOtp()
     {
+        // Tentukan email untuk rate limiting
+        $email = Auth::check() ? Auth::user()->email : session('otp_email');
+        
+        if (!$email) {
+            return redirect()->route('auth.register');
+        }
+
+        // Rate Limiting: Maksimal 5 request per jam per email
+        $rateLimitKey = 'otp_limit_' . $email;
+        $attempts = Cache::get($rateLimitKey, 0);
+        
+        if ($attempts >= 5) {
+            $remainingTime = Cache::get($rateLimitKey . '_time');
+            $minutesLeft = $remainingTime ? $remainingTime->diffInMinutes(now()) : 60;
+            
+            return back()->withErrors([
+                'otp' => "Terlalu banyak request OTP. Silakan coba lagi dalam {$minutesLeft} menit."
+            ]);
+        }
+
         // SKENARIO A: User Lama
         if (Auth::check()) {
             $user = Auth::user();
@@ -134,9 +154,6 @@ class AuthController extends Controller
         
         // SKENARIO B: User Baru
         else {
-            $email = session('otp_email');
-            if (!$email) return redirect()->route('auth.register');
-
             $cacheKey = 'regist_temp_' . $email;
             $tempData = Cache::get($cacheKey);
 
@@ -150,7 +167,14 @@ class AuthController extends Controller
             }
         }
 
-        return back()->with('success', 'Kode OTP baru dikirim.');
+        // Increment counter rate limit
+        if ($attempts === 0) {
+            // Set expiry time untuk tracking
+            Cache::put($rateLimitKey . '_time', now()->addHour(), now()->addHour());
+        }
+        Cache::put($rateLimitKey, $attempts + 1, now()->addHour());
+
+        return back()->with('success', 'Kode OTP baru dikirim. (' . ($attempts + 1) . '/5 request)');
     }
 
     // --- 4. FUNGSI STANDAR LAINNYA ---

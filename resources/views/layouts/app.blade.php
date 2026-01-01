@@ -58,9 +58,9 @@
                 </div>
 
                 <div class="flex items-center gap-2 sm:gap-4 lg:gap-6">
-                    <form action="{{ route('search') }}" method="GET" class="hidden lg:block relative group">
+                    <form action="{{ route('search') }}" method="GET" class="hidden lg:block relative group flex-shrink-0">
                         <input type="text" name="search" placeholder="Cari anime..." 
-                               class="w-72 theme-input border-2 theme-border rounded-full px-5 py-2.5 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-600/30 transition-all placeholder-gray-600 focus:placeholder-gray-500">
+                               class="w-56 xl:w-72 max-w-full theme-input border-2 theme-border rounded-full px-5 py-2.5 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-600/30 transition-all placeholder-gray-600 focus:placeholder-gray-500">
                         <button type="submit" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500 transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>

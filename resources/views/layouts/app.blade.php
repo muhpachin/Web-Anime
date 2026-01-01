@@ -27,113 +27,137 @@
 </head>
 <body class="antialiased theme-body font-['Inter']">
     
-    <nav class="theme-surface backdrop-blur-xl border-b theme-border sticky top-0 z-50 shadow-xl shadow-black/20 transition-all duration-300">
+    <nav class="theme-surface backdrop-blur-xl border-b theme-border sticky top-0 z-50 shadow-xl shadow-black/20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20">
-                <div class="flex items-center gap-4 lg:gap-8">
-                    <a href="{{ route('home') }}" class="flex items-center gap-2 group flex-shrink-0">
-                        <img src="{{ asset('images/logo.png') }}" alt="nipnime Logo" class="w-auto h-8 sm:h-10 object-contain drop-shadow-[0_0_10px_rgba(220,38,38,0.5)] group-hover:drop-shadow-[0_0_15px_rgba(220,38,38,0.8)] transition-all">
-                        <span class="text-xl sm:text-2xl font-black text-white tracking-tighter font-['Montserrat'] uppercase hidden sm:block"><span class="text-red-600">nip</span>nime</span>
+                <div class="flex items-center gap-4 lg:gap-10">
+                    <a href="{{ route('home') }}" class="group flex items-center gap-2 sm:gap-3 hover:scale-105 transition-transform">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-lg shadow-red-600/30 group-hover:shadow-red-600/50 transition-all">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+                        </div>
+                        <span class="text-xl sm:text-3xl font-black text-white tracking-tighter font-['Montserrat'] uppercase"><span class="text-red-600">nip</span>nime</span>
                     </a>
-
-                    <div class="hidden lg:flex items-center gap-1 xl:gap-2">
-                        <a href="{{ route('home') }}" class="px-3 py-2 rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('home') ? 'text-red-500 bg-white/10' : 'text-gray-300' }}">
+                    
+                    <div class="hidden lg:flex items-center space-x-1 text-sm font-bold uppercase tracking-widest">
+                        <a href="{{ route('home') }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('home') ? 'text-red-500 bg-white/10' : '' }}">
                             🏠 Home
                         </a>
-                        <a href="{{ route('search') }}" class="px-3 py-2 rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('search') && request('type') !== 'Movie' ? 'text-red-500 bg-white/10' : 'text-gray-300' }}">
-                            📺 Anime
+                        <a href="{{ route('search') }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('search') && request('type') !== 'Movie' ? 'text-red-500 bg-white/10' : '' }}">
+                            📺 Daftar Anime
                         </a>
-                        <a href="{{ route('schedule') }}" class="px-3 py-2 rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('schedule') ? 'text-red-500 bg-white/10' : 'text-gray-300' }}">
+                        <a href="{{ route('schedule') }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('schedule') ? 'text-red-500 bg-white/10' : '' }}">
                             📅 Jadwal
                         </a>
-                        <a href="{{ route('search', ['type' => 'Movie']) }}" class="px-3 py-2 rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('search') && request('type') === 'Movie' ? 'text-red-500 bg-white/10' : 'text-gray-300' }}">
+                        <a href="{{ route('search', ['type' => 'Movie']) }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('search') && request('type') === 'Movie' ? 'text-red-500 bg-white/10' : '' }}">
                             🎬 Movie
                         </a>
                         @auth
-                        <a href="{{ route('request.index') }}" class="px-3 py-2 rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('request.*') ? 'text-red-500 bg-white/10' : 'text-gray-300' }}">
+                        <a href="{{ route('request.index') }}" class="px-4 py-2 rounded-lg hover:bg-white/10 hover:text-red-500 transition {{ request()->routeIs('request.*') ? 'text-red-500 bg-white/10' : '' }}">
                             📝 Request
                         </a>
                         @endauth
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 sm:gap-4">
-                    <form action="{{ route('search') }}" method="GET" class="hidden lg:block relative group w-48 xl:w-64 transition-all duration-300 focus-within:w-64 xl:focus-within:w-80">
+                <div class="flex items-center gap-2 sm:gap-4 lg:gap-6">
+                    <form action="{{ route('search') }}" method="GET" class="hidden lg:block relative group">
                         <input type="text" name="search" placeholder="Cari anime..." 
-                               class="w-full theme-input border-2 theme-border rounded-full px-4 py-2 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-600/30 transition-all placeholder-gray-500">
-                        <button type="submit" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500 transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               class="w-72 theme-input border-2 theme-border rounded-full px-5 py-2.5 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-600/30 transition-all placeholder-gray-600 focus:placeholder-gray-500">
+                        <button type="submit" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                         </button>
                     </form>
 
-                    <button id="mobileSearchBtn" class="lg:hidden p-2 text-gray-400 hover:text-white transition rounded-lg hover:bg-white/10">
+                    <button id="mobileSearchBtn" class="lg:hidden p-2 text-gray-400 hover:text-white transition">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </button>
 
-                    <button id="themeToggle" class="p-2 text-gray-400 hover:text-white transition rounded-lg hover:bg-white/10" aria-label="Toggle tema">
-                        <span id="themeToggleIcon" class="text-xl">🌙</span>
-                    </button>
+                    <div class="flex items-center gap-2 sm:gap-4">
+                        <button id="themeToggle" class="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg border theme-border theme-elevated hover:scale-105 transition-all text-xs sm:text-sm font-bold uppercase tracking-wider" aria-label="Toggle tema">
+                            <span id="themeToggleIcon">🌙</span>
+                            <span id="themeToggleLabel" class="hidden xl:inline">Gelap</span>
+                        </button>
 
-                    @auth
-                        <div class="relative" id="profileDropdown">
-                            <button id="profileButton" class="flex items-center gap-2 focus:outline-none">
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-red-600/50 hover:border-red-600 transition-all">
-                                    @if(Auth::user()->avatar)
-                                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
-                                    @else
-                                        <div class="w-full h-full bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white font-bold">
+                        @auth
+                            <div class="flex items-center gap-2 sm:gap-3">
+                                <span class="text-sm font-bold text-gray-300 hidden md:inline">{{ Auth::user()->name }}</span>
+                                <div class="relative" id="profileDropdown">
+                                    <button id="profileButton" class="w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white text-sm sm:text-base font-black hover:shadow-lg hover:shadow-red-600/40 transition-all uppercase border-2 border-red-600/50">
+                                        @if(Auth::user()->avatar)
+                                            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+                                                 alt="{{ Auth::user()->name }}"
+                                                 class="w-full h-full object-cover">
+                                        @else
                                             {{ substr(Auth::user()->name, 0, 1) }}
+                                        @endif
+                                    </button>
+                                    
+                                    <div id="profileMenu" class="absolute right-0 mt-2 w-48 theme-card rounded-xl shadow-xl opacity-0 invisible transition-all duration-300 border theme-border z-50">
+                                        <div class="p-3 border-b border-white/10 flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white font-black flex-shrink-0">
+                                                @if(Auth::user()->avatar)
+                                                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+                                                         alt="{{ Auth::user()->name }}"
+                                                         class="w-full h-full object-cover">
+                                                @else
+                                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                                @endif
+                                            </div>
+                                            <div class="overflow-hidden">
+                                                <p class="text-sm font-bold text-white truncate">{{ Auth::user()->name }}</p>
+                                                <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
+                                            </div>
                                         </div>
-                                    @endif
-                                </div>
-                            </button>
-                            <div id="profileMenu" class="absolute right-0 mt-2 w-56 theme-card rounded-xl shadow-xl opacity-0 invisible transform scale-95 transition-all duration-200 border theme-border z-50 origin-top-right">
-                                <div class="p-4 border-b border-white/10">
-                                    <p class="text-sm font-bold text-white truncate">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
-                                </div>
-                                <div class="py-2">
-                                    <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-red-500 transition">
-                                        👤 Profil Saya
-                                    </a>
-                                    <form action="{{ route('auth.logout') }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-white/5 transition font-bold">
-                                            🚪 Logout
-                                        </button>
-                                    </form>
+                                        <a href="{{ route('profile.show') }}" class="block w-full text-left px-4 py-3 hover:bg-white/5 text-sm font-bold transition text-gray-300 hover:text-red-500">
+                                            👤 PROFIL
+                                        </a>
+                                        <form action="{{ route('auth.logout') }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="w-full text-left px-4 py-3 text-red-500 hover:bg-white/5 text-sm font-bold transition">
+                                                🚪 LOGOUT
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    @else
-                        <div class="flex items-center gap-2">
-                            <a href="{{ route('auth.login') }}" class="hidden sm:block text-sm font-bold text-gray-300 hover:text-white transition px-4 py-2">
-                                Masuk
+                        @else
+                            <a href="{{ route('auth.login') }}" class="text-xs sm:text-sm font-bold hover:text-red-500 transition px-2 sm:px-4 py-2 rounded-lg hover:bg-white/10 uppercase tracking-wider">
+                                🔐 <span class="hidden sm:inline">Masuk</span>
                             </a>
-                            <a href="{{ route('auth.register') }}" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition shadow-lg shadow-red-600/20">
-                                Daftar
+                            <a href="{{ route('auth.register') }}" class="text-xs sm:text-sm font-bold px-3 sm:px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg transition-all shadow-lg shadow-red-600/30 uppercase tracking-wider">
+                                <span class="hidden sm:inline">✓ Daftar</span>
+                                <span class="sm:hidden">Daftar</span>
                             </a>
-                        </div>
-                    @endauth
+                        @endauth
 
-                    <button id="mobileMenuBtn" class="lg:hidden p-2 text-gray-400 hover:text-white transition rounded-lg hover:bg-white/10">
-                        <svg id="burgerIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                    </button>
+                        @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
+                        <div class="hidden lg:flex items-center border-l border-white/10 pl-4 ml-2">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="holidayToggle" class="sr-only peer" onchange="toggleHolidayEffect()">
+                                <div class="w-8 h-4 bg-gray-700 rounded-full peer-checked:bg-red-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4"></div>
+                            </label>
+                        </div>
+                        @endif
+
+                        <button id="mobileMenuBtn" class="lg:hidden p-2 text-gray-400 hover:text-white transition">
+                            <svg id="burgerIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="mobileSearchBar" class="hidden lg:hidden absolute top-full left-0 w-full border-t theme-border theme-surface p-4 shadow-xl z-40 animate-fadeInDown">
+        <div id="mobileSearchBar" class="hidden lg:hidden absolute top-full left-0 w-full px-4 pb-4 theme-surface shadow-lg z-40">
             <form action="{{ route('search') }}" method="GET" class="relative">
                 <input type="text" name="search" placeholder="Cari anime..." 
-                       class="w-full theme-input border-2 theme-border rounded-lg px-4 py-3 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-600/30 transition-all placeholder-gray-500">
-                <button type="submit" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500 transition">
+                       class="w-full theme-input border-2 theme-border rounded-full px-5 py-3 text-sm focus:border-red-600 focus:ring-2 focus:ring-red-600/30 transition-all placeholder-gray-600">
+                <button type="submit" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
@@ -141,29 +165,39 @@
             </form>
         </div>
 
-        <div id="mobileMenu" class="hidden lg:hidden absolute top-full left-0 w-full border-t theme-border theme-surface shadow-xl z-40 max-h-[85vh] overflow-y-auto">
-            <div class="flex flex-col p-4 space-y-2">
-                <a href="{{ route('home') }}" class="px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider {{ request()->routeIs('home') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
+        <div id="mobileMenu" class="absolute top-full left-0 w-full theme-surface border-t theme-border shadow-2xl z-40 transition-all duration-500 ease-in-out max-h-0 opacity-0 overflow-hidden pointer-events-none lg:hidden">
+            <div class="px-4 py-4 space-y-2">
+                
+                <a href="{{ route('home') }}" style="transition-delay: 0ms;" 
+                   class="mobile-item block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-500 opacity-0 -translate-y-4 {{ request()->routeIs('home') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
                     🏠 Home
                 </a>
-                <a href="{{ route('search') }}" class="px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider {{ request()->routeIs('search') && request('type') !== 'Movie' ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
+                
+                <a href="{{ route('search') }}" style="transition-delay: 100ms;"
+                   class="mobile-item block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-500 opacity-0 -translate-y-4 {{ request()->routeIs('search') && request('type') !== 'Movie' ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
                     📺 Daftar Anime
                 </a>
-                <a href="{{ route('schedule') }}" class="px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider {{ request()->routeIs('schedule') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
+                
+                <a href="{{ route('schedule') }}" style="transition-delay: 200ms;"
+                   class="mobile-item block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-500 opacity-0 -translate-y-4 {{ request()->routeIs('schedule') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
                     📅 Jadwal
                 </a>
-                <a href="{{ route('search', ['type' => 'Movie']) }}" class="px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider {{ request()->routeIs('search') && request('type') === 'Movie' ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
+                
+                <a href="{{ route('search', ['type' => 'Movie']) }}" style="transition-delay: 300ms;"
+                   class="mobile-item block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-500 opacity-0 -translate-y-4 {{ request()->routeIs('search') && request('type') === 'Movie' ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
                     🎬 Movie
                 </a>
+                
                 @auth
-                <a href="{{ route('request.index') }}" class="px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider {{ request()->routeIs('request.*') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
+                <a href="{{ route('request.index') }}" style="transition-delay: 400ms;"
+                   class="mobile-item block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-500 opacity-0 -translate-y-4 {{ request()->routeIs('request.*') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-white/10' }}">
                     📝 Request
                 </a>
                 @endauth
-                
+
                 @if(isset($holidaySettings) && (($holidaySettings['christmas'] ?? false) || ($holidaySettings['new_year'] ?? false)))
-                <div class="pt-4 border-t border-white/10 mt-2">
-                    <div class="flex items-center justify-between px-4 py-2 bg-white/5 rounded-lg">
+                <div style="transition-delay: 500ms;" class="mobile-item pt-4 border-t border-white/10 mt-2 transition-all duration-500 opacity-0 -translate-y-4">
+                    <div class="flex items-center justify-between px-4 py-2 bg-white/5 rounded-xl">
                         <span class="text-xs font-bold uppercase text-gray-400">✨ Efek Visual</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="holidayToggleMobile" class="sr-only peer" onchange="toggleHolidayEffect()">
@@ -183,7 +217,9 @@
             <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 mb-8 sm:mb-12">
                 <div class="col-span-2 sm:col-span-2 md:col-span-1">
                     <div class="flex items-center gap-2 mb-4">
-                        <img src="{{ asset('images/logo.png') }}" alt="nipnime Logo" class="w-auto h-12 sm:h-16 object-contain drop-shadow-[0_0_8px_rgba(220,38,38,0.4)]">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+                        </div>
                         <span class="text-xl sm:text-2xl font-black text-white font-['Montserrat'] uppercase"><span class="text-red-600">nip</span>nime</span>
                     </div>
                     <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">Platform streaming anime terlengkap dengan subtitle Indonesia berkualitas tinggi.</p>
@@ -286,25 +322,44 @@
                     e.stopPropagation();
                     profileMenu.classList.toggle('opacity-0');
                     profileMenu.classList.toggle('invisible');
-                    profileMenu.classList.toggle('scale-95');
                 });
                 document.addEventListener('click', function(e) {
                     if (profileDropdown && !profileDropdown.contains(e.target)) {
-                        profileMenu.classList.add('opacity-0', 'invisible', 'scale-95');
+                        profileMenu.classList.add('opacity-0', 'invisible');
                     }
                 });
             }
 
-            // Mobile Menu Logic
+            // Logic Animasi Menu Mobile (Disempurnakan dengan Scroll)
             if (mobileMenuBtn && mobileMenu) {
                 mobileMenuBtn.addEventListener('click', function() {
-                    mobileMenu.classList.toggle('hidden');
-                    const isHidden = mobileMenu.classList.contains('hidden');
-                    
-                    if (!isHidden) {
+                    const isClosed = mobileMenu.classList.contains('max-h-0');
+                    const items = mobileMenu.querySelectorAll('.mobile-item');
+
+                    if (isClosed) {
+                        // 1. Buka Container dengan Tinggi Maksimal yang Responsif (85vh)
+                        mobileMenu.classList.remove('max-h-0', 'opacity-0', 'pointer-events-none');
+                        mobileMenu.classList.add('max-h-[85vh]', 'opacity-100', 'pointer-events-auto', 'overflow-y-auto'); // Tambah overflow-y-auto
                         burgerIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>';
+                        
+                        // 2. Animasi Item muncul satu per satu
+                        items.forEach(item => {
+                            item.classList.remove('opacity-0', '-translate-y-4');
+                            item.classList.add('opacity-100', 'translate-y-0');
+                        });
+
+                        // Tutup search bar jika terbuka
                         if (mobileSearchBar) mobileSearchBar.classList.add('hidden');
                     } else {
+                        // 1. Reset Item (Hilang dulu)
+                        items.forEach(item => {
+                            item.classList.add('opacity-0', '-translate-y-4');
+                            item.classList.remove('opacity-100', 'translate-y-0');
+                        });
+
+                        // 2. Tutup Container
+                        mobileMenu.classList.add('max-h-0', 'opacity-0', 'pointer-events-none');
+                        mobileMenu.classList.remove('max-h-[85vh]', 'opacity-100', 'pointer-events-auto', 'overflow-y-auto'); // Hapus overflow-y-auto
                         burgerIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>';
                     }
                 });
@@ -316,8 +371,9 @@
                     mobileSearchBar.classList.toggle('hidden');
                     if (!mobileSearchBar.classList.contains('hidden')) {
                         mobileSearchBar.querySelector('input').focus();
-                        if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
-                            mobileMenuBtn.click();
+                        // Tutup menu jika search dibuka
+                        if (mobileMenu && !mobileMenu.classList.contains('max-h-0')) {
+                            mobileMenuBtn.click(); // Trigger click untuk menutup menu dengan animasi
                         }
                     }
                 });

@@ -81,10 +81,21 @@ class UserResource extends Resource
                 
                 Forms\Components\Section::make('Role & Status')
                     ->schema([
-                        Forms\Components\Toggle::make('is_admin')
-                            ->label('Admin')
-                            ->helperText('Aktifkan untuk memberikan akses admin panel')
-                            ->default(false),
+                        Forms\Components\Select::make('role')
+                            ->label('Role')
+                            ->options([
+                                User::ROLE_USER => 'User',
+                                User::ROLE_ADMIN => 'Admin',
+                                User::ROLE_SUPERADMIN => 'Superadmin',
+                            ])
+                            ->default(User::ROLE_USER)
+                            ->helperText('Hanya superadmin yang bisa mengubah role.')
+                            ->visible(fn () => auth()->user()?->isSuperAdmin())
+                            ->required(),
+                        Forms\Components\Placeholder::make('role_readonly')
+                            ->label('Role')
+                            ->content(fn ($record) => ucfirst($record?->role ?? User::ROLE_USER))
+                            ->visible(fn () => !auth()->user()?->isSuperAdmin()),
                     ]),
             ]);
     }
@@ -106,13 +117,24 @@ class UserResource extends Resource
                     ->label('Email')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('is_admin')
-                    ->label('Admin')
-                    ->boolean()
-                    ->trueIcon('heroicon-o-shield-check')
-                    ->falseIcon('heroicon-o-user')
-                    ->trueColor('success')
-                    ->falseColor('gray'),
+                Tables\Columns\BadgeColumn::make('role')
+                    ->label('Role')
+                    ->colors([
+                        'gray' => User::ROLE_USER,
+                        'success' => User::ROLE_ADMIN,
+                        'warning' => User::ROLE_SUPERADMIN,
+                    ])
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('created_episodes_count')
+                    ->label('Episode Dibuat')
+                    ->counts('createdEpisodes')
+                    ->sortable()
+                    ->visible(fn () => auth()->user()?->isSuperAdmin()),
+                Tables\Columns\TextColumn::make('admin_episode_logs_sum_amount')
+                    ->label('Total Bayaran')
+                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state ?? 0, 0, ',', '.'))
+                    ->sortable()
+                    ->visible(fn () => auth()->user()?->isSuperAdmin()),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Terdaftar')
                     ->dateTime('d M Y')
@@ -128,11 +150,12 @@ class UserResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                Tables\Filters\TernaryFilter::make('is_admin')
-                    ->label('Role')
-                    ->placeholder('Semua User')
-                    ->trueLabel('Admin Only')
-                    ->falseLabel('User Only'),
+                Tables\Filters\SelectFilter::make('role')
+                    ->options([
+                        User::ROLE_USER => 'User',
+                        User::ROLE_ADMIN => 'Admin',
+                        User::ROLE_SUPERADMIN => 'Superadmin',
+                    ]),
                 Tables\Filters\Filter::make('has_avatar')
                     ->label('Punya Avatar')
                     ->query(fn (Builder $query): Builder => $query->whereNotNull('avatar')),
@@ -141,15 +164,26 @@ class UserResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('toggleAdmin')
-                    ->label(fn ($record) => $record->is_admin ? 'Remove Admin' : 'Make Admin')
-                    ->icon(fn ($record) => $record->is_admin ? 'heroicon-o-shield-exclamation' : 'heroicon-o-shield-check')
-                    ->color(fn ($record) => $record->is_admin ? 'danger' : 'success')
+                    ->visible(fn () => auth()->user()?->isSuperAdmin())
+                    ->label(fn ($record) => $record->isAdmin() ? 'Turunkan ke User' : 'Jadikan Admin')
+                    ->icon(fn ($record) => $record->isAdmin() ? 'heroicon-o-shield-exclamation' : 'heroicon-o-shield-check')
+                    ->color(fn ($record) => $record->isAdmin() ? 'danger' : 'success')
                     ->requiresConfirmation()
-                    ->modalHeading(fn ($record) => $record->is_admin ? 'Hapus Role Admin?' : 'Jadikan Admin?')
-                    ->modalSubheading(fn ($record) => $record->is_admin 
-                        ? 'User ini tidak akan bisa mengakses admin panel lagi.' 
+                    ->modalHeading(fn ($record) => $record->isAdmin() ? 'Hapus Role Admin?' : 'Jadikan Admin?')
+                    ->modalSubheading(fn ($record) => $record->isAdmin()
+                        ? 'User ini tidak akan bisa mengakses admin panel lagi.'
                         : 'User ini akan mendapat akses ke admin panel.')
-                    ->action(fn ($record) => $record->update(['is_admin' => !$record->is_admin])),
+                    ->action(function ($record) {
+                        if ($record->isSuperAdmin() || $record->id === auth()->id()) {
+                            throw new \Exception('Tidak bisa mengubah role superadmin atau akun sendiri.');
+                        }
+
+                        $newRole = $record->isAdmin() ? User::ROLE_USER : User::ROLE_ADMIN;
+                        $record->update([
+                            'role' => $newRole,
+                            'is_admin' => $newRole !== User::ROLE_USER,
+                        ]);
+                    }),
                 Tables\Actions\DeleteAction::make()
                     ->before(function ($record) {
                         // Prevent deleting own account
@@ -167,19 +201,32 @@ class UserResource extends Resource
                         }
                     }),
                 Tables\Actions\BulkAction::make('makeAdmin')
+                    ->visible(fn () => auth()->user()?->isSuperAdmin())
                     ->label('Jadikan Admin')
                     ->icon('heroicon-o-shield-check')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->action(fn ($records) => $records->each->update(['is_admin' => true])),
+                    ->action(fn ($records) => $records->each(function ($record) {
+                        if ($record->isSuperAdmin()) {
+                            return;
+                        }
+                        $record->update([
+                            'role' => User::ROLE_ADMIN,
+                            'is_admin' => true,
+                        ]);
+                    })),
                 Tables\Actions\BulkAction::make('removeAdmin')
+                    ->visible(fn () => auth()->user()?->isSuperAdmin())
                     ->label('Hapus Role Admin')
                     ->icon('heroicon-o-shield-exclamation')
                     ->color('danger')
                     ->requiresConfirmation()
                     ->action(fn ($records) => $records->each(function ($record) {
-                        if ($record->id !== auth()->id()) {
-                            $record->update(['is_admin' => false]);
+                        if ($record->id !== auth()->id() && !$record->isSuperAdmin()) {
+                            $record->update([
+                                'role' => User::ROLE_USER,
+                                'is_admin' => false,
+                            ]);
                         }
                     })),
             ]);
@@ -190,6 +237,18 @@ class UserResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        if (auth()->user()?->isSuperAdmin()) {
+            $query->withCount('createdEpisodes')
+                ->withSum('adminEpisodeLogs as admin_episode_logs_sum_amount', 'amount');
+        }
+
+        return $query;
     }
     
     public static function getPages(): array

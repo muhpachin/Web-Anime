@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\AdminEpisodeLog;
 use App\Models\Anime;
 use App\Models\Episode;
 use App\Models\User;
@@ -16,7 +17,10 @@ class StatsOverview extends BaseWidget
     
     protected function getCards(): array
     {
-        return [
+        $adminCount = User::admins()->count();
+        $superAdminCount = User::where('role', User::ROLE_SUPERADMIN)->count();
+
+        $cards = [
             Card::make('Total Anime', Anime::count())
                 ->description('Koleksi anime')
                 ->descriptionIcon('heroicon-s-film')
@@ -33,10 +37,21 @@ class StatsOverview extends BaseWidget
                 ->color('warning')
                 ->chart([5, 4, 6, 8, 7, 9, 6, 8]),
             Card::make('Total Users', User::count())
-                ->description(User::where('is_admin', true)->count() . ' admin')
+                ->description($adminCount . ' admin | ' . $superAdminCount . ' superadmin')
                 ->descriptionIcon('heroicon-s-users')
                 ->color('danger')
                 ->chart([2, 3, 2, 4, 3, 5, 4, 6]),
         ];
+
+        if (auth()->user()?->isSuperAdmin()) {
+            $pendingAmount = AdminEpisodeLog::where('status', AdminEpisodeLog::STATUS_PENDING)->sum('amount');
+            $cards[] = Card::make('Pending Bayaran Admin', 'Rp ' . number_format($pendingAmount, 0, ',', '.'))
+                ->description('Per episode Rp 500')
+                ->descriptionIcon('heroicon-s-currency-dollar')
+                ->color('info')
+                ->chart([5, 6, 7, 8, 6, 7, 8, 9]);
+        }
+
+        return $cards;
     }
 }

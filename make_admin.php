@@ -29,15 +29,21 @@ if (!$user) {
     exit(1);
 }
 
-// Check if already admin
-if ($user->is_admin) {
+// Check if already admin or superadmin
+if ($user->role === User::ROLE_SUPERADMIN) {
+    echo "\n✅ User '{$user->name}' is already a SUPERADMIN!\n\n";
+    exit(0);
+}
+
+if ($user->isAdmin()) {
     echo "\n✅ User '{$user->name}' is already an admin!\n\n";
     exit(0);
 }
 
 // Make admin
+$user->role = User::ROLE_ADMIN;
 $user->is_admin = true;
 $user->save();
 
 echo "\n✅ SUCCESS! User '{$user->name}' is now an admin!\n";
-echo "   They can now access: http://localhost/admin\n\n";
+echo "   Mereka bisa akses: http://localhost/admin\n\n";

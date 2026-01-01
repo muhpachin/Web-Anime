@@ -36,6 +36,7 @@ if ($email) {
 }
 
 // Make admin
+$user->role = User::ROLE_ADMIN;
 $user->is_admin = true;
 $user->save();
 

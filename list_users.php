@@ -24,8 +24,13 @@ if ($users->isEmpty()) {
 }
 
 foreach ($users as $user) {
-    $adminBadge = $user->is_admin ? "✅ ADMIN" : "👤 User";
-    echo "$adminBadge | {$user->name} | {$user->email}\n";
+    $roleBadge = match ($user->role) {
+        \App\Models\User::ROLE_SUPERADMIN => '⭐ SUPERADMIN',
+        \App\Models\User::ROLE_ADMIN => '✅ ADMIN',
+        default => '👤 User',
+    };
+
+    echo "$roleBadge | {$user->name} | {$user->email}\n";
 }
 
 echo "\n";

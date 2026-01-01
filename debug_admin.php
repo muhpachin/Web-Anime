@@ -29,7 +29,8 @@ echo "📊 USER DATA FROM DATABASE:\n";
 echo "   ID: {$user->id}\n";
 echo "   Name: {$user->name}\n";
 echo "   Email: {$user->email}\n";
-echo "   is_admin: " . ($user->is_admin ? "✅ TRUE (1)" : "❌ FALSE (0)") . "\n";
+echo "   role: " . ($user->role ?? '-') . "\n";
+echo "   is_admin flag: " . ($user->is_admin ? "✅ TRUE (1)" : "❌ FALSE (0)") . "\n";
 echo "   Raw value: " . var_export($user->is_admin, true) . "\n\n";
 
 // Check via Eloquent
@@ -38,7 +39,9 @@ echo "📊 USER DATA FROM ELOQUENT:\n";
 echo "   ID: {$eloquentUser->id}\n";
 echo "   Name: {$eloquentUser->name}\n";
 echo "   Email: {$eloquentUser->email}\n";
-echo "   is_admin: " . var_export($eloquentUser->is_admin, true) . "\n";
+echo "   role: {$eloquentUser->role}\n";
+echo "   is_admin accessor: " . var_export($eloquentUser->is_admin, true) . "\n";
+echo "   isSuperAdmin(): " . ($eloquentUser->isSuperAdmin() ? 'YES' : 'NO') . "\n";
 
 // Check canAccessFilament
 try {

@@ -7,7 +7,12 @@ use App\Models\User;
 
 $user = User::firstOrCreate(
     ['email' => 'admin@example.com'],
-    ['name' => 'Admin', 'password' => bcrypt('password')]
+    [
+        'name' => 'Admin',
+        'password' => bcrypt('password'),
+        'role' => User::ROLE_ADMIN,
+        'is_admin' => true,
+    ]
 );
 
 echo "✓ Admin user created: {$user->email}\n";

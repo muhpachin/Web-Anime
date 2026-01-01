@@ -28,11 +28,13 @@ class LatestUsers extends BaseWidget
             Tables\Columns\TextColumn::make('name')
                 ->label('Nama')
                 ->searchable(),
-            Tables\Columns\IconColumn::make('is_admin')
-                ->label('Admin')
-                ->boolean()
-                ->trueIcon('heroicon-o-shield-check')
-                ->falseIcon('heroicon-o-user'),
+            Tables\Columns\BadgeColumn::make('role')
+                ->label('Role')
+                ->colors([
+                    'gray' => User::ROLE_USER,
+                    'success' => User::ROLE_ADMIN,
+                    'warning' => User::ROLE_SUPERADMIN,
+                ]),
             Tables\Columns\TextColumn::make('created_at')
                 ->label('Bergabung')
                 ->since(),

@@ -103,16 +103,29 @@
             </div>
         @endif
         </div>
-        <button type="button"
-                class="absolute top-3 right-3 flex items-center gap-2 px-3 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg theme-elevated border theme-border shadow hover:scale-105 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                data-fullscreen-target="{{ $playerContainerId }}"
-                aria-label="Toggle fullscreen"
-                aria-pressed="false">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 9V5h4M4 5l5 5M20 15v4h-4M20 19l-5-5M4 15v4h4M4 19l5-5M20 9V5h-4M20 5l-5 5" />
-            </svg>
-            <span class="hidden sm:inline">Fullscreen</span>
-        </button>
+        
+        {{-- Custom Fullscreen Button with Keyboard Shortcut --}}
+        <div class="absolute top-3 right-3 group/fs z-50">
+            <button type="button"
+                    class="relative flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg bg-black/70 backdrop-blur-sm border border-white/20 text-white shadow-lg hover:bg-black/90 hover:border-red-500/60 hover:scale-105 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                    data-fullscreen-target="{{ $playerContainerId }}"
+                    aria-label="Toggle fullscreen (Press F)"
+                    aria-pressed="false"
+                    title="Fullscreen (F)">
+                <svg class="w-4 h-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path class="enter-fs" d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                    <path class="exit-fs hidden" d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                </svg>
+                <span class="hidden sm:inline text-[11px]">Fullscreen</span>
+                <kbd class="hidden md:inline-block ml-1 px-1.5 py-0.5 text-[9px] font-mono bg-white/10 rounded border border-white/20">F</kbd>
+            </button>
+            
+            {{-- Tooltip --}}
+            <div class="absolute right-0 top-full mt-2 px-3 py-2 bg-black/90 backdrop-blur-sm text-white text-xs rounded-lg shadow-xl border border-white/10 opacity-0 invisible group-hover/fs:opacity-100 group-hover/fs:visible transition-all duration-200 whitespace-nowrap pointer-events-none">
+                <p class="font-bold">Tekan F untuk fullscreen</p>
+                <p class="text-gray-400 text-[10px] mt-0.5">Atau klik tombol ini</p>
+            </div>
+        </div>
     </div>
 
     {{-- Server List --}}
@@ -161,34 +174,80 @@
             if (request) request.call(element);
         };
 
-        document.addEventListener('click', (event) => {
-            const button = event.target.closest('[data-fullscreen-target]');
-            if (!button) return;
-            event.preventDefault();
-            const target = document.getElementById(button.getAttribute('data-fullscreen-target'));
+        const toggleFullscreen = (target) => {
             const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || document.mozFullScreenElement;
             if (fullscreenElement === target) {
                 exitFullscreen();
             } else {
                 enterFullscreen(target);
             }
+        };
+
+        // Button click handler
+        document.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-fullscreen-target]');
+            if (!button) return;
+            event.preventDefault();
+            const target = document.getElementById(button.getAttribute('data-fullscreen-target'));
+            toggleFullscreen(target);
         });
 
+        // Keyboard shortcut: Press F to toggle fullscreen
+        document.addEventListener('keydown', (event) => {
+            // Only activate if F key is pressed and not typing in an input/textarea
+            if (event.key.toLowerCase() === 'f' && !event.ctrlKey && !event.altKey && !event.metaKey) {
+                const activeElement = document.activeElement;
+                const isTyping = activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable);
+                
+                if (!isTyping) {
+                    event.preventDefault();
+                    // Find the first video player container
+                    const playerContainer = document.querySelector('[data-fullscreen-target]');
+                    if (playerContainer) {
+                        const targetId = playerContainer.getAttribute('data-fullscreen-target');
+                        const target = document.getElementById(targetId);
+                        if (target) {
+                            toggleFullscreen(target);
+                        }
+                    }
+                }
+            }
+        });
+
+        // Sync button state and icon
         const syncButtonState = () => {
             const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || document.mozFullScreenElement;
             document.querySelectorAll('[data-fullscreen-target]').forEach((btn) => {
                 const targetId = btn.getAttribute('data-fullscreen-target');
                 const isActive = fullscreenElement && fullscreenElement.id === targetId;
+                
+                // Update aria-pressed
                 btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                
+                // Update visual state
                 btn.classList.toggle('ring-2', isActive);
-                btn.classList.toggle('ring-red-500/60', isActive);
+                btn.classList.toggle('ring-red-500', isActive);
+                btn.classList.toggle('bg-red-600', isActive);
+                btn.classList.toggle('border-red-500', isActive);
+                
+                // Toggle icon paths
+                const enterPath = btn.querySelector('.enter-fs');
+                const exitPath = btn.querySelector('.exit-fs');
+                if (enterPath && exitPath) {
+                    enterPath.classList.toggle('hidden', isActive);
+                    exitPath.classList.toggle('hidden', !isActive);
+                }
             });
         };
 
+        // Listen to fullscreen changes
         document.addEventListener('fullscreenchange', syncButtonState);
         document.addEventListener('webkitfullscreenchange', syncButtonState);
         document.addEventListener('msfullscreenchange', syncButtonState);
         document.addEventListener('mozfullscreenchange', syncButtonState);
+        
+        // Initial sync
+        syncButtonState();
     })();
     </script>
     @endpush

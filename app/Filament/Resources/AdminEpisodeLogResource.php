@@ -15,7 +15,7 @@ class AdminEpisodeLogResource extends Resource
 {
     protected static ?string $model = AdminEpisodeLog::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
     protected static ?string $navigationLabel = 'Admin Performance';
     protected static ?string $navigationGroup = 'Superadmin';
     protected static ?int $navigationSort = 1;

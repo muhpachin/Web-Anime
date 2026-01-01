@@ -45,6 +45,29 @@ return [
             'local_domain' => env('MAIL_EHLO_DOMAIN'),
         ],
 
+        // SMTP Backup 1 - Brevo.com (300 emails/day gratis)
+        'smtp_backup' => [
+            'transport' => 'smtp',
+            'host' => env('MAIL_BACKUP_HOST', 'smtp-relay.brevo.com'),
+            'port' => env('MAIL_BACKUP_PORT', 587),
+            'encryption' => env('MAIL_BACKUP_ENCRYPTION', 'tls'),
+            'username' => env('MAIL_BACKUP_USERNAME'),
+            'password' => env('MAIL_BACKUP_PASSWORD'),
+            'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN'),
+        ],
+
+        // SMTP Backup 2 - Gmail atau provider lain
+        'smtp_backup2' => [
+            'transport' => 'smtp',
+            'host' => env('MAIL_BACKUP2_HOST', 'smtp.gmail.com'),
+            'port' => env('MAIL_BACKUP2_PORT', 587),
+            'encryption' => env('MAIL_BACKUP2_ENCRYPTION', 'tls'),
+            'username' => env('MAIL_BACKUP2_USERNAME'),
+            'password' => env('MAIL_BACKUP2_PASSWORD'),
+            'timeout' => null,
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],

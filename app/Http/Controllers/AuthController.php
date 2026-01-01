@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Password;
 use App\Mail\OtpVerificationMail;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -41,9 +42,9 @@ class AuthController extends Controller
         // Key Cache pakai email biar unik: 'regist_temp_email@domain.com'
         Cache::put('regist_temp_' . $validated['email'], $tempUserData, now()->addMinutes(30));
 
-        // Kirim OTP ke email tersebut (Kita kirim manual object user dummy)
+        // Kirim OTP ke email tersebut dengan failover system
         $dummyUser = (object) ['name' => $validated['name'], 'email' => $validated['email']];
-        Mail::to($validated['email'])->queue(new OtpVerificationMail($dummyUser, $tempUserData['otp']));
+        $this->sendEmailWithFailover($validated['email'], new OtpVerificationMail($dummyUser, $tempUserData['otp']));
 
         // Simpan email di session browser supaya halaman OTP tahu siapa yang mau diverifikasi
         session(['otp_email' => $validated['email']]);
@@ -149,7 +150,7 @@ class AuthController extends Controller
 
             $otp = random_int(100000, 999999);
             Cache::put('otp_' . $user->id, $otp, now()->addMinutes(15));
-            Mail::to($user->email)->queue(new OtpVerificationMail($user, $otp));
+            $this->sendEmailWithFailover($user->email, new OtpVerificationMail($user, $otp));
         } 
         
         // SKENARIO B: User Baru
@@ -163,7 +164,7 @@ class AuthController extends Controller
                 Cache::put($cacheKey, $tempData, now()->addMinutes(30));
 
                 $dummyUser = (object) ['name' => $tempData['name'], 'email' => $email];
-                Mail::to($email)->queue(new OtpVerificationMail($dummyUser, $tempData['otp']));
+                $this->sendEmailWithFailover($email, new OtpVerificationMail($dummyUser, $tempData['otp']));
             }
         }
 
@@ -202,5 +203,53 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('auth.login');
+    }
+
+    /**
+     * Kirim email dengan sistem failover otomatis
+     * Jika provider utama gagal/limit, coba provider backup
+     */
+    private function sendEmailWithFailover($to, $mailable)
+    {
+        // Daftar provider email berurutan (utama -> backup)
+        $mailers = ['smtp', 'smtp_backup', 'smtp_backup2'];
+        
+        foreach ($mailers as $index => $mailer) {
+            try {
+                // Cek apakah mailer tersedia di config
+                if (!config("mail.mailers.{$mailer}")) {
+                    continue;
+                }
+
+                // Coba kirim email dengan mailer ini
+                Mail::mailer($mailer)->to($to)->queue($mailable);
+                
+                // Jika berhasil, log dan keluar
+                if ($index > 0) {
+                    Log::warning("Email sent using backup mailer: {$mailer} for {$to}");
+                }
+                
+                return true;
+                
+            } catch (\Exception $e) {
+                // Log error dari provider yang gagal
+                Log::error("Failed to send email with {$mailer}: " . $e->getMessage());
+                
+                // Jika ini bukan provider terakhir, lanjut ke backup berikutnya
+                if ($index < count($mailers) - 1) {
+                    Log::info("Trying next backup mailer...");
+                    continue;
+                }
+                
+                // Jika semua provider gagal, log critical error
+                Log::critical("All email providers failed for: {$to}");
+                
+                // Bisa throw exception atau return false sesuai kebutuhan
+                // throw $e; // Uncomment jika mau munculkan error ke user
+                return false;
+            }
+        }
+        
+        return false;
     }
 }

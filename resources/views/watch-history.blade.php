@@ -3,7 +3,7 @@
 @section('title', 'History Nonton - NIPNIME')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-b from-[#0f1115] via-[#0a0d13] to-black">
+<div class="min-h-screen gradient-bg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <!-- Header with Back Button -->
         <div class="flex items-center gap-4 mb-8">
@@ -28,7 +28,7 @@
                     $progressPercent = $history->progress > 0 ? min(100, ($history->progress / $duration) * 100) : 0;
                 @endphp
                 <a href="{{ route('watch', $episode) }}" class="group block">
-                    <div class="relative bg-[#1a1d24] rounded-2xl overflow-hidden border border-white/10 group-hover:border-purple-600/50 transition-all duration-300 shadow-lg">
+                    <div class="relative theme-card rounded-2xl overflow-hidden border theme-border group-hover:border-purple-600/50 transition-all duration-300 shadow-lg">
                         <div class="relative aspect-[3/4] overflow-hidden">
                             <img src="{{ $anime->poster_image ? asset('storage/' . $anime->poster_image) : asset('images/placeholder.png') }}" 
                                  alt="{{ $anime->title }}"
@@ -63,7 +63,7 @@
                         </div>
                         
                         <!-- Info -->
-                        <div class="p-3 sm:p-4 bg-gradient-to-b from-[#1a1d24] to-[#0f1115]">
+                        <div class="p-3 sm:p-4 theme-surface">
                             <h3 class="text-white font-bold text-xs sm:text-sm line-clamp-2 group-hover:text-purple-500 transition-colors min-h-[2.5rem]">{{ $anime->title }}</h3>
                             <div class="flex items-center justify-between mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/10">
                                 <span class="text-[9px] sm:text-[10px] text-gray-500 font-semibold">

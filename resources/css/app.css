@@ -354,6 +354,10 @@
         --tw-gradient-to: var(--bg-subtle) !important;
     }
 
+    [data-theme='light'] .to-\[\#000000\] {
+        --tw-gradient-to: var(--bg-subtle) !important;
+    }
+
     [data-theme='light'] .text-gray-200,
     [data-theme='light'] .text-gray-300 {
         color: var(--text-primary) !important;

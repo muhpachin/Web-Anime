@@ -5,11 +5,11 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
-class OtpVerificationMail extends Mailable implements ShouldQueue
+class OtpVerificationMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Illuminate\Bus\Queueable;
+    use Illuminate\Queue\SerializesModels;
 
     public $otp;
     public $user;

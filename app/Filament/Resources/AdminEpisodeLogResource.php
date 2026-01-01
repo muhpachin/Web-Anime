@@ -25,24 +25,24 @@ class AdminEpisodeLogResource extends Resource
         return auth()->user()?->isSuperAdmin() ?? false;
     }
 
-    public static function canViewAny($user): bool
+    public static function canViewAny(): bool
     {
-        return $user?->isSuperAdmin();
+        return auth()->user()?->isSuperAdmin() ?? false;
     }
 
-    public static function canCreate($user): bool
+    public static function canCreate(): bool
     {
-        return $user?->isSuperAdmin();
+        return auth()->user()?->isSuperAdmin() ?? false;
     }
 
-    public static function canEdit($user, $record): bool
+    public static function canEdit($record): bool
     {
-        return $user?->isSuperAdmin();
+        return auth()->user()?->isSuperAdmin() ?? false;
     }
 
-    public static function canDelete($user, $record): bool
+    public static function canDelete($record): bool
     {
-        return $user?->isSuperAdmin();
+        return auth()->user()?->isSuperAdmin() ?? false;
     }
 
     public static function form(Form $form): Form

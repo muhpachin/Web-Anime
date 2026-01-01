@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\EpisodeResource\Pages;
 
 use App\Filament\Resources\EpisodeResource;
+use App\Models\AdminEpisodeLog;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -15,5 +16,31 @@ class EditEpisode extends EditRecord
         return [
             Actions\DeleteAction::make(),
         ];
+    }
+
+    protected function afterSave(): void
+    {
+        $user = auth()->user();
+
+        // Hanya catat admin biasa, skip untuk superadmin
+        if (!$user || !$user->isAdmin() || $user->isSuperAdmin()) {
+            return;
+        }
+
+        // Cek apakah admin ini sudah punya log untuk episode ini
+        $existingLog = AdminEpisodeLog::where('user_id', $user->id)
+            ->where('episode_id', $this->record->id)
+            ->first();
+
+        // Jika belum ada log, buat log baru (artinya admin ini edit episode orang lain)
+        if (!$existingLog) {
+            AdminEpisodeLog::create([
+                'user_id' => $user->id,
+                'episode_id' => $this->record->id,
+                'amount' => AdminEpisodeLog::DEFAULT_AMOUNT,
+                'status' => AdminEpisodeLog::STATUS_PENDING,
+                'note' => 'Episode diedit',
+            ]);
+        }
     }
 }

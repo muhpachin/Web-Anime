@@ -23,19 +23,18 @@ class CreateEpisode extends CreateRecord
     {
         $user = auth()->user();
 
+        // Hanya catat admin biasa, skip untuk superadmin
         if (!$user || !$user->isAdmin() || $user->isSuperAdmin()) {
             return;
         }
 
-        AdminEpisodeLog::firstOrCreate(
-            [
-                'user_id' => $user->id,
-                'episode_id' => $this->record->id,
-            ],
-            [
-                'amount' => AdminEpisodeLog::DEFAULT_AMOUNT,
-                'status' => AdminEpisodeLog::STATUS_PENDING,
-            ]
-        );
+        // Catat log episode yang dibuat admin
+        AdminEpisodeLog::create([
+            'user_id' => $user->id,
+            'episode_id' => $this->record->id,
+            'amount' => AdminEpisodeLog::DEFAULT_AMOUNT,
+            'status' => AdminEpisodeLog::STATUS_PENDING,
+            'note' => 'Episode baru dibuat',
+        ]);
     }
 }

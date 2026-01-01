@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title') - nipnime</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
 
     <script>
         (() => {
@@ -30,9 +32,7 @@
             <div class="flex items-center justify-between h-16 sm:h-20">
                 <div class="flex items-center gap-4 lg:gap-10">
                     <a href="{{ route('home') }}" class="group flex items-center gap-2 sm:gap-3 hover:scale-105 transition-transform">
-                        <div class="w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-lg shadow-red-600/30 group-hover:shadow-red-600/50 transition-all">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
-                        </div>
+                        <img src="{{ asset('images/logo.png') }}" alt="nipnime Logo" class="w-auto h-9 sm:h-11 object-contain drop-shadow-[0_0_10px_rgba(220,38,38,0.5)] group-hover:drop-shadow-[0_0_15px_rgba(220,38,38,0.8)] transition-all">
                         <span class="text-xl sm:text-3xl font-black text-white tracking-tighter font-['Montserrat'] uppercase"><span class="text-red-600">nip</span>nime</span>
                     </a>
                     
@@ -213,9 +213,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 mb-8 sm:mb-12">
                 <div class="col-span-2 sm:col-span-2 md:col-span-1">
                     <div class="flex items-center gap-2 mb-4">
-                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
-                        </div>
+                        <img src="{{ asset('images/logo.png') }}" alt="nipnime Logo" class="w-auto h-8 sm:h-10 object-contain drop-shadow-[0_0_8px_rgba(220,38,38,0.4)]">
                         <span class="text-xl sm:text-2xl font-black text-white font-['Montserrat'] uppercase"><span class="text-red-600">nip</span>nime</span>
                     </div>
                     <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">Platform streaming anime terlengkap dengan subtitle Indonesia berkualitas tinggi.</p>

@@ -243,13 +243,17 @@ class AnimeResource extends Resource
                                     ->get();
                                 
                                 foreach ($recentEpisodes as $episode) {
-                                    \App\Models\AdminEpisodeLog::create([
-                                        'user_id' => $user->id,
-                                        'episode_id' => $episode->id,
-                                        'amount' => \App\Models\AdminEpisodeLog::DEFAULT_AMOUNT,
-                                        'status' => \App\Models\AdminEpisodeLog::STATUS_PENDING,
-                                        'note' => 'Sync videos dari anime: ' . $record->title,
-                                    ]);
+                                    \App\Models\AdminEpisodeLog::updateOrCreate(
+                                        [
+                                            'user_id' => $user->id,
+                                            'episode_id' => $episode->id,
+                                        ],
+                                        [
+                                            'amount' => \App\Models\AdminEpisodeLog::DEFAULT_AMOUNT,
+                                            'status' => \App\Models\AdminEpisodeLog::STATUS_PENDING,
+                                            'note' => 'Sync videos dari anime: ' . $record->title,
+                                        ]
+                                    );
                                 }
                             }
                         }

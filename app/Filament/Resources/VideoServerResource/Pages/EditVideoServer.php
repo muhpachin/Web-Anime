@@ -25,16 +25,18 @@ class EditVideoServer extends EditRecord
             ->where('episode_id', $this->record->episode_id)
             ->first();
 
-        // Jika belum ada log, buat log baru
-        if (!$existingLog) {
-            AdminEpisodeLog::create([
+        // Jika belum ada log, buat log baru (atau update catatan)
+        AdminEpisodeLog::updateOrCreate(
+            [
                 'user_id' => $user->id,
                 'episode_id' => $this->record->episode_id,
+            ],
+            [
                 'amount' => AdminEpisodeLog::DEFAULT_AMOUNT,
                 'status' => AdminEpisodeLog::STATUS_PENDING,
                 'note' => 'Mengedit video server: ' . $this->record->server_name,
-            ]);
-        }
+            ]
+        );
     }
 
     protected function getActions(): array

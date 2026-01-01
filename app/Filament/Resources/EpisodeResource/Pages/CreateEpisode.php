@@ -29,12 +29,16 @@ class CreateEpisode extends CreateRecord
         }
 
         // Catat log episode yang dibuat admin
-        AdminEpisodeLog::create([
-            'user_id' => $user->id,
-            'episode_id' => $this->record->id,
-            'amount' => AdminEpisodeLog::DEFAULT_AMOUNT,
-            'status' => AdminEpisodeLog::STATUS_PENDING,
-            'note' => 'Episode baru dibuat',
-        ]);
+        AdminEpisodeLog::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'episode_id' => $this->record->id,
+            ],
+            [
+                'amount' => AdminEpisodeLog::DEFAULT_AMOUNT,
+                'status' => AdminEpisodeLog::STATUS_PENDING,
+                'note' => 'Episode baru dibuat',
+            ]
+        );
     }
 }

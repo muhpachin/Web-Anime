@@ -148,13 +148,17 @@ class EpisodeResource extends Resource
                         // --- AUTO CREATE ADMIN LOG (SETIAP SYNC) ---
                         $user = auth()->user();
                         if ($user && $user->isAdmin() && ($created > 0 || $updated > 0)) {
-                            \App\Models\AdminEpisodeLog::create([
-                                'user_id' => $user->id,
-                                'episode_id' => $record->id,
-                                'amount' => \App\Models\AdminEpisodeLog::DEFAULT_AMOUNT,
-                                'status' => \App\Models\AdminEpisodeLog::STATUS_PENDING,
-                                'note' => "Sync video servers (Created: {$created}, Updated: {$updated})",
-                            ]);
+                            \App\Models\AdminEpisodeLog::updateOrCreate(
+                                [
+                                    'user_id' => $user->id,
+                                    'episode_id' => $record->id,
+                                ],
+                                [
+                                    'amount' => \App\Models\AdminEpisodeLog::DEFAULT_AMOUNT,
+                                    'status' => \App\Models\AdminEpisodeLog::STATUS_PENDING,
+                                    'note' => "Sync video servers (Created: {$created}, Updated: {$updated})",
+                                ]
+                            );
                         }
 
                         // --- AUTO CLEANUP SINGLE UPLOAD ---
@@ -290,13 +294,17 @@ class EpisodeResource extends Resource
                             // --- AUTO CREATE ADMIN LOG PER EPISODE ---
                             $user = auth()->user();
                             if ($user && $user->isAdmin() && !empty($servers)) {
-                                \App\Models\AdminEpisodeLog::create([
-                                    'user_id' => $user->id,
-                                    'episode_id' => $episode->id,
-                                    'amount' => \App\Models\AdminEpisodeLog::DEFAULT_AMOUNT,
-                                    'status' => \App\Models\AdminEpisodeLog::STATUS_PENDING,
-                                    'note' => "Bulk sync video servers (" . count($servers) . " servers)",
-                                ]);
+                                \App\Models\AdminEpisodeLog::updateOrCreate(
+                                    [
+                                        'user_id' => $user->id,
+                                        'episode_id' => $episode->id,
+                                    ],
+                                    [
+                                        'amount' => \App\Models\AdminEpisodeLog::DEFAULT_AMOUNT,
+                                        'status' => \App\Models\AdminEpisodeLog::STATUS_PENDING,
+                                        'note' => "Bulk sync video servers (" . count($servers) . " servers)",
+                                    ]
+                                );
                             }
                         }
 

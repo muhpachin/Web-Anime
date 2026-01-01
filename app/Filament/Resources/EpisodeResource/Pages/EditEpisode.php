@@ -33,14 +33,16 @@ class EditEpisode extends EditRecord
             ->first();
 
         // Jika belum ada log, buat log baru (artinya admin ini edit episode orang lain)
-        if (!$existingLog) {
-            AdminEpisodeLog::create([
+        AdminEpisodeLog::updateOrCreate(
+            [
                 'user_id' => $user->id,
                 'episode_id' => $this->record->id,
+            ],
+            [
                 'amount' => AdminEpisodeLog::DEFAULT_AMOUNT,
                 'status' => AdminEpisodeLog::STATUS_PENDING,
                 'note' => 'Episode diedit',
-            ]);
-        }
+            ]
+        );
     }
 }

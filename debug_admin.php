@@ -51,13 +51,5 @@ try {
     echo "   canAccessFilament(): ❌ ERROR - {$e->getMessage()}\n";
 }
 
-// Check canAccessPanel
-try {
-    $panel = new \Filament\Panel('admin');
-    $canAccessPanel = $eloquentUser->canAccessPanel($panel);
-    echo "   canAccessPanel(): " . ($canAccessPanel ? "✅ TRUE" : "❌ FALSE") . "\n";
-} catch (Exception $e) {
-    echo "   canAccessPanel(): ❌ ERROR - {$e->getMessage()}\n";
-}
 
 echo "\n";

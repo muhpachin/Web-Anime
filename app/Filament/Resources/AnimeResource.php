@@ -230,6 +230,30 @@ class AnimeResource extends Resource
                             $errorText = "\nErrors: " . implode('; ', array_slice($result['errors'], 0, 3));
                         }
 
+                        // --- AUTO CREATE ADMIN LOG PER EPISODE YANG BERHASIL DI-SYNC ---
+                        $user = auth()->user();
+                        if ($user && $user->isAdmin() && !$user->isSuperAdmin()) {
+                            // Dapatkan episode yang baru dibuat atau diupdate
+                            $episodeCount = $result['created'] + $result['updated'];
+                            if ($episodeCount > 0) {
+                                // Ambil episode terbaru dari anime ini
+                                $recentEpisodes = Episode::where('anime_id', $record->id)
+                                    ->orderBy('created_at', 'desc')
+                                    ->limit($episodeCount)
+                                    ->get();
+                                
+                                foreach ($recentEpisodes as $episode) {
+                                    \App\Models\AdminEpisodeLog::create([
+                                        'user_id' => $user->id,
+                                        'episode_id' => $episode->id,
+                                        'amount' => \App\Models\AdminEpisodeLog::DEFAULT_AMOUNT,
+                                        'status' => \App\Models\AdminEpisodeLog::STATUS_PENDING,
+                                        'note' => 'Sync videos dari anime: ' . $record->title,
+                                    ]);
+                                }
+                            }
+                        }
+
                         \Filament\Notifications\Notification::make()
                             ->title('Sync videos completed')
                             ->success()

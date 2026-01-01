@@ -145,19 +145,16 @@ class EpisodeResource extends Resource
                             if ($vs->wasRecentlyCreated) { $created++; } else { $updated++; }
                         }
 
-                        // --- AUTO CREATE ADMIN LOG (ONCE PER EPISODE) ---
+                        // --- AUTO CREATE ADMIN LOG (SETIAP SYNC) ---
                         $user = auth()->user();
-                        if ($user && $user->isAdmin() && !$user->isSuperAdmin()) {
-                            \App\Models\AdminEpisodeLog::firstOrCreate(
-                                [
-                                    'user_id' => $user->id,
-                                    'episode_id' => $record->id,
-                                ],
-                                [
-                                    'amount' => \App\Models\AdminEpisodeLog::DEFAULT_AMOUNT,
-                                    'status' => \App\Models\AdminEpisodeLog::STATUS_PENDING,
-                                ]
-                            );
+                        if ($user && $user->isAdmin() && !$user->isSuperAdmin() && ($created > 0 || $updated > 0)) {
+                            \App\Models\AdminEpisodeLog::create([
+                                'user_id' => $user->id,
+                                'episode_id' => $record->id,
+                                'amount' => \App\Models\AdminEpisodeLog::DEFAULT_AMOUNT,
+                                'status' => \App\Models\AdminEpisodeLog::STATUS_PENDING,
+                                'note' => "Sync video servers (Created: {$created}, Updated: {$updated})",
+                            ]);
                         }
 
                         // --- AUTO CLEANUP SINGLE UPLOAD ---
@@ -289,6 +286,18 @@ class EpisodeResource extends Resource
                                 if ($vs->wasRecentlyCreated) { $totalCreated++; } else { $totalUpdated++; }
                             }
                             $processedEpisodes++;
+                            
+                            // --- AUTO CREATE ADMIN LOG PER EPISODE ---
+                            $user = auth()->user();
+                            if ($user && $user->isAdmin() && !$user->isSuperAdmin() && !empty($servers)) {
+                                \App\Models\AdminEpisodeLog::create([
+                                    'user_id' => $user->id,
+                                    'episode_id' => $episode->id,
+                                    'amount' => \App\Models\AdminEpisodeLog::DEFAULT_AMOUNT,
+                                    'status' => \App\Models\AdminEpisodeLog::STATUS_PENDING,
+                                    'note' => "Bulk sync video servers (" . count($servers) . " servers)",
+                                ]);
+                            }
                         }
 
                         // --- 3. AUTO CLEANUP (FITUR FILE SAMPAH) ---

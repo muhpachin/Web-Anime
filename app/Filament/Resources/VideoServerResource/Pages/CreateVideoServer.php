@@ -3,12 +3,39 @@
 namespace App\Filament\Resources\VideoServerResource\Pages;
 
 use App\Filament\Resources\VideoServerResource;
+use App\Models\AdminEpisodeLog;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateVideoServer extends CreateRecord
 {
     protected static string $resource = VideoServerResource::class;
+
+    protected function afterCreate(): void
+    {
+        $user = auth()->user();
+
+        // Hanya catat admin biasa, skip untuk superadmin
+        if (!$user || !$user->isAdmin() || $user->isSuperAdmin()) {
+            return;
+        }
+
+        // Cek apakah admin ini sudah punya log untuk episode ini
+        $existingLog = AdminEpisodeLog::where('user_id', $user->id)
+            ->where('episode_id', $this->record->episode_id)
+            ->first();
+
+        // Jika belum ada log, buat log baru
+        if (!$existingLog) {
+            AdminEpisodeLog::create([
+                'user_id' => $user->id,
+                'episode_id' => $this->record->episode_id,
+                'amount' => AdminEpisodeLog::DEFAULT_AMOUNT,
+                'status' => AdminEpisodeLog::STATUS_PENDING,
+                'note' => 'Menambahkan video server: ' . $this->record->server_name,
+            ]);
+        }
+    }
 
     protected function getFormActions(): array
     {

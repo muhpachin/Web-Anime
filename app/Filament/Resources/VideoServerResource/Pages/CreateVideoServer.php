@@ -15,8 +15,8 @@ class CreateVideoServer extends CreateRecord
     {
         $user = auth()->user();
 
-        // Hanya catat admin biasa, skip untuk superadmin
-        if (!$user || !$user->isAdmin() || $user->isSuperAdmin()) {
+        // Catat semua admin (termasuk superadmin)
+        if (!$user || !$user->isAdmin()) {
             return;
         }
 

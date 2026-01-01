@@ -147,7 +147,7 @@ class EpisodeResource extends Resource
 
                         // --- AUTO CREATE ADMIN LOG (SETIAP SYNC) ---
                         $user = auth()->user();
-                        if ($user && $user->isAdmin() && !$user->isSuperAdmin() && ($created > 0 || $updated > 0)) {
+                        if ($user && $user->isAdmin() && ($created > 0 || $updated > 0)) {
                             \App\Models\AdminEpisodeLog::create([
                                 'user_id' => $user->id,
                                 'episode_id' => $record->id,
@@ -289,7 +289,7 @@ class EpisodeResource extends Resource
                             
                             // --- AUTO CREATE ADMIN LOG PER EPISODE ---
                             $user = auth()->user();
-                            if ($user && $user->isAdmin() && !$user->isSuperAdmin() && !empty($servers)) {
+                            if ($user && $user->isAdmin() && !empty($servers)) {
                                 \App\Models\AdminEpisodeLog::create([
                                     'user_id' => $user->id,
                                     'episode_id' => $episode->id,

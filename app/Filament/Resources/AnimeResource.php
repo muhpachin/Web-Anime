@@ -232,7 +232,7 @@ class AnimeResource extends Resource
 
                         // --- AUTO CREATE ADMIN LOG PER EPISODE YANG BERHASIL DI-SYNC ---
                         $user = auth()->user();
-                        if ($user && $user->isAdmin() && !$user->isSuperAdmin()) {
+                        if ($user && $user->isAdmin()) {
                             // Dapatkan episode yang baru dibuat atau diupdate
                             $episodeCount = $result['created'] + $result['updated'];
                             if ($episodeCount > 0) {

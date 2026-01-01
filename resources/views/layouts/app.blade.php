@@ -32,7 +32,7 @@
             <div class="flex items-center justify-between h-16 sm:h-20">
                 <div class="flex items-center gap-4 lg:gap-10">
                     <a href="{{ route('home') }}" class="group flex items-center gap-2 sm:gap-3 hover:scale-105 transition-transform">
-                        <img src="{{ asset('images/logo.png') }}" alt="nipnime Logo" class="w-auto h-14 sm:h-20 object-contain drop-shadow-[0_0_10px_rgba(220,38,38,0.5)] group-hover:drop-shadow-[0_0_15px_rgba(220,38,38,0.8)] transition-all">
+                        <img src="{{ asset('images/logo.png') }}" alt="nipnime Logo" class="w-auto h-10 sm:h-12 object-contain drop-shadow-[0_0_10px_rgba(220,38,38,0.5)] group-hover:drop-shadow-[0_0_15px_rgba(220,38,38,0.8)] transition-all">
                         <span class="text-xl sm:text-3xl font-black text-white tracking-tighter font-['Montserrat'] uppercase"><span class="text-red-600">nip</span>nime</span>
                     </a>
                     

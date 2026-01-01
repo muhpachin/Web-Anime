@@ -32,7 +32,7 @@
             <div class="flex items-center justify-between h-16 sm:h-20">
                 <div class="flex items-center gap-4 lg:gap-10">
                     <a href="{{ route('home') }}" class="group flex items-center gap-2 sm:gap-3 hover:scale-105 transition-transform">
-                        <img src="{{ asset('images/logo.png') }}" alt="nipnime Logo" class="w-auto h-9 sm:h-11 object-contain drop-shadow-[0_0_10px_rgba(220,38,38,0.5)] group-hover:drop-shadow-[0_0_15px_rgba(220,38,38,0.8)] transition-all">
+                        <img src="{{ asset('images/logo.png') }}" alt="nipnime Logo" class="w-auto h-14 sm:h-20 object-contain drop-shadow-[0_0_10px_rgba(220,38,38,0.5)] group-hover:drop-shadow-[0_0_15px_rgba(220,38,38,0.8)] transition-all">
                         <span class="text-xl sm:text-3xl font-black text-white tracking-tighter font-['Montserrat'] uppercase"><span class="text-red-600">nip</span>nime</span>
                     </a>
                     
@@ -213,7 +213,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 mb-8 sm:mb-12">
                 <div class="col-span-2 sm:col-span-2 md:col-span-1">
                     <div class="flex items-center gap-2 mb-4">
-                        <img src="{{ asset('images/logo.png') }}" alt="nipnime Logo" class="w-auto h-8 sm:h-10 object-contain drop-shadow-[0_0_8px_rgba(220,38,38,0.4)]">
+                        <img src="{{ asset('images/logo.png') }}" alt="nipnime Logo" class="w-auto h-12 sm:h-16 object-contain drop-shadow-[0_0_8px_rgba(220,38,38,0.4)]">
                         <span class="text-xl sm:text-2xl font-black text-white font-['Montserrat'] uppercase"><span class="text-red-600">nip</span>nime</span>
                     </div>
                     <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">Platform streaming anime terlengkap dengan subtitle Indonesia berkualitas tinggi.</p>

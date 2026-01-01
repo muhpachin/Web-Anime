@@ -2,8 +2,8 @@
 @php($playerContainerId = 'player-shell-' . $episode->id)
 <div class="w-full space-y-4">
     {{-- Video Player Container --}}
-    <div class="relative group">
-        <div id="{{ $playerContainerId }}" class="theme-elevated rounded-lg overflow-hidden shadow-2xl aspect-video border theme-border">
+    <div class="relative group" x-data="{ fullscreen: false }">
+        <div id="{{ $playerContainerId }}" class="theme-elevated rounded-lg overflow-hidden shadow-2xl aspect-video border theme-border fullscreen-container">
         @if($selectedServer)
             @if(str_contains($selectedServer->embed_url, '<iframe'))
                 {{-- Handle Full Iframe Tags --}}
@@ -108,13 +108,12 @@
         <div class="absolute top-3 right-3 group/fs z-50">
             <button type="button"
                     class="relative flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg bg-black/70 backdrop-blur-sm border border-white/20 text-white shadow-lg hover:bg-black/90 hover:border-red-500/60 hover:scale-105 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                    data-fullscreen-target="{{ $playerContainerId }}"
+                    onclick="togglePlayerFullscreen('{{ $playerContainerId }}')"
                     aria-label="Toggle fullscreen (Press F)"
-                    aria-pressed="false"
                     title="Fullscreen (F)">
                 <svg class="w-4 h-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path class="enter-fs" d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                    <path class="exit-fs hidden" d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                    <path class="enter-fs-icon" d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                    <path class="exit-fs-icon hidden" d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
                 </svg>
                 <span class="hidden sm:inline text-[11px]">Fullscreen</span>
                 <kbd class="hidden md:inline-block ml-1 px-1.5 py-0.5 text-[9px] font-mono bg-white/10 rounded border border-white/20">F</kbd>
@@ -162,93 +161,115 @@
     @once
     @push('scripts')
     <script>
-    (function(){
-        const exitFullscreen = () => {
-            const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen || document.mozCancelFullScreen;
-            if (exit) exit.call(document);
-        };
-
-        const enterFullscreen = (element) => {
-            if (!element) return;
-            const request = element.requestFullscreen || element.webkitRequestFullscreen || element.msRequestFullscreen || element.mozRequestFullScreen;
-            if (request) request.call(element);
-        };
-
-        const toggleFullscreen = (target) => {
-            const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || document.mozFullScreenElement;
-            if (fullscreenElement === target) {
-                exitFullscreen();
-            } else {
-                enterFullscreen(target);
+    // Global fullscreen functions
+    window.togglePlayerFullscreen = function(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error('Container not found:', containerId);
+            return;
+        }
+        
+        const fullscreenElement = document.fullscreenElement || 
+                                 document.webkitFullscreenElement || 
+                                 document.msFullscreenElement || 
+                                 document.mozFullScreenElement;
+        
+        if (fullscreenElement) {
+            // Exit fullscreen
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
             }
-        };
+        } else {
+            // Enter fullscreen
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            } else if (container.msRequestFullscreen) {
+                container.msRequestFullscreen();
+            } else if (container.mozRequestFullScreen) {
+                container.mozRequestFullScreen();
+            }
+        }
+    };
 
-        // Button click handler
-        document.addEventListener('click', (event) => {
-            const button = event.target.closest('[data-fullscreen-target]');
-            if (!button) return;
-            event.preventDefault();
-            const target = document.getElementById(button.getAttribute('data-fullscreen-target'));
-            toggleFullscreen(target);
-        });
-
+    // Initialize fullscreen handlers
+    document.addEventListener('DOMContentLoaded', function() {
         // Keyboard shortcut: Press F to toggle fullscreen
-        document.addEventListener('keydown', (event) => {
-            // Only activate if F key is pressed and not typing in an input/textarea
+        document.addEventListener('keydown', function(event) {
             if (event.key.toLowerCase() === 'f' && !event.ctrlKey && !event.altKey && !event.metaKey) {
                 const activeElement = document.activeElement;
-                const isTyping = activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable);
+                const isTyping = activeElement && (
+                    activeElement.tagName === 'INPUT' || 
+                    activeElement.tagName === 'TEXTAREA' || 
+                    activeElement.isContentEditable
+                );
                 
                 if (!isTyping) {
                     event.preventDefault();
-                    // Find the first video player container
-                    const playerContainer = document.querySelector('[data-fullscreen-target]');
-                    if (playerContainer) {
-                        const targetId = playerContainer.getAttribute('data-fullscreen-target');
-                        const target = document.getElementById(targetId);
-                        if (target) {
-                            toggleFullscreen(target);
-                        }
+                    const container = document.querySelector('.fullscreen-container');
+                    if (container) {
+                        window.togglePlayerFullscreen(container.id);
                     }
+                }
+            }
+            
+            // ESC alternative handler
+            if (event.key === 'Escape') {
+                const fullscreenElement = document.fullscreenElement || 
+                                         document.webkitFullscreenElement || 
+                                         document.msFullscreenElement || 
+                                         document.mozFullScreenElement;
+                if (fullscreenElement) {
+                    updateFullscreenUI();
                 }
             }
         });
 
-        // Sync button state and icon
-        const syncButtonState = () => {
-            const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || document.mozFullScreenElement;
-            document.querySelectorAll('[data-fullscreen-target]').forEach((btn) => {
-                const targetId = btn.getAttribute('data-fullscreen-target');
-                const isActive = fullscreenElement && fullscreenElement.id === targetId;
-                
-                // Update aria-pressed
-                btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-                
-                // Update visual state
-                btn.classList.toggle('ring-2', isActive);
-                btn.classList.toggle('ring-red-500', isActive);
-                btn.classList.toggle('bg-red-600', isActive);
-                btn.classList.toggle('border-red-500', isActive);
-                
-                // Toggle icon paths
-                const enterPath = btn.querySelector('.enter-fs');
-                const exitPath = btn.querySelector('.exit-fs');
-                if (enterPath && exitPath) {
-                    enterPath.classList.toggle('hidden', isActive);
-                    exitPath.classList.toggle('hidden', !isActive);
+        // Update UI when fullscreen changes
+        function updateFullscreenUI() {
+            const fullscreenElement = document.fullscreenElement || 
+                                     document.webkitFullscreenElement || 
+                                     document.msFullscreenElement || 
+                                     document.mozFullScreenElement;
+            
+            const isFullscreen = !!fullscreenElement;
+            
+            // Update all fullscreen buttons
+            document.querySelectorAll('.fullscreen-container').forEach(container => {
+                const button = container.parentElement.querySelector('button[onclick*="togglePlayerFullscreen"]');
+                if (button) {
+                    const enterIcon = button.querySelector('.enter-fs-icon');
+                    const exitIcon = button.querySelector('.exit-fs-icon');
+                    
+                    if (isFullscreen && fullscreenElement.id === container.id) {
+                        button.classList.add('ring-2', 'ring-red-500', 'bg-red-600/80', 'border-red-500');
+                        if (enterIcon) enterIcon.classList.add('hidden');
+                        if (exitIcon) exitIcon.classList.remove('hidden');
+                    } else {
+                        button.classList.remove('ring-2', 'ring-red-500', 'bg-red-600/80', 'border-red-500');
+                        if (enterIcon) enterIcon.classList.remove('hidden');
+                        if (exitIcon) exitIcon.classList.add('hidden');
+                    }
                 }
             });
-        };
+        }
 
-        // Listen to fullscreen changes
-        document.addEventListener('fullscreenchange', syncButtonState);
-        document.addEventListener('webkitfullscreenchange', syncButtonState);
-        document.addEventListener('msfullscreenchange', syncButtonState);
-        document.addEventListener('mozfullscreenchange', syncButtonState);
+        // Listen to fullscreen change events
+        document.addEventListener('fullscreenchange', updateFullscreenUI);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
+        document.addEventListener('msfullscreenchange', updateFullscreenUI);
+        document.addEventListener('mozfullscreenchange', updateFullscreenUI);
         
-        // Initial sync
-        syncButtonState();
-    })();
+        // Initial UI update
+        updateFullscreenUI();
+    });
     </script>
     @endpush
     @endonce

@@ -153,6 +153,21 @@
                 <h3 class="text-lg font-black mb-4 uppercase tracking-widest italic">Daftar Episode</h3>
                 <div class="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                     @foreach($animeEpisodes as $ep)
+                        @php
+                            $minutesSinceAdded = $ep->created_at ? now()->diffInMinutes($ep->created_at) : null;
+                            $isNew = $minutesSinceAdded !== null && $minutesSinceAdded <= (72 * 60); // mark new if within 72 hours
+
+                            if (is_null($minutesSinceAdded)) {
+                                $addedLabel = 'Episode tersedia';
+                            } elseif ($minutesSinceAdded < 60) {
+                                $addedLabel = 'Baru saja';
+                            } elseif ($minutesSinceAdded < 1440) {
+                                $addedLabel = floor($minutesSinceAdded / 60) . ' jam lalu';
+                            } else {
+                                $addedLabel = floor($minutesSinceAdded / 1440) . ' hari lalu';
+                            }
+                        @endphp
+
                         <a href="{{ route('watch', $ep) }}"
                            @class([
                                'flex items-center gap-4 p-3 rounded-xl transition-all border',
@@ -164,7 +179,12 @@
                             </div>
                             <div class="min-w-0">
                                 <p class="text-xs font-bold truncate leading-tight uppercase">{{ $ep->title }}</p>
-                                <p class="text-[10px] opacity-60">Baru Saja</p>
+                                <div class="flex items-center gap-2 text-[10px]">
+                                    @if($isNew)
+                                        <span class="px-2 py-0.5 rounded-full bg-red-600/20 text-red-400 border border-red-500/40 font-black tracking-wide">BARU</span>
+                                    @endif
+                                    <span class="opacity-60">{{ $addedLabel }}</span>
+                                </div>
                             </div>
                         </a>
                     @endforeach

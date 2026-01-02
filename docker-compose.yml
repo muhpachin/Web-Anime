@@ -35,13 +35,18 @@ services:
     depends_on:
       - mysql
       - app
-    networks:
-      - nipnime-network
+    environment:
       - WEB_DOCUMENT_ROOT=/app/public
       - PHP_MEMORY_LIMIT=2048M
       - PHP_UPLOAD_MAX_FILESIZE=2000M
       - PHP_POST_MAX_SIZE=2000M
       - NGINX_CLIENT_MAX_BODY_SIZE=2000m
+    networks:
+      - nipnime-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: nipnime-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: nipnime_secret_password

@@ -286,6 +286,21 @@ class AdminEpisodeLogResource extends Resource
                     ->visible(fn () => auth()->user()?->isSuperAdmin() ?? false),
             ])
             ->bulkActions([
+                Tables\Actions\BulkAction::make('approve')
+                    ->label('Set Approved')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('info')
+                    ->requiresConfirmation()
+                    ->modalHeading(fn ($records) => 'Set Approved (' . $records->count() . ' log)')
+                    ->modalSubheading('Hanya status Pending yang akan di-approve; Paid tidak diubah.')
+                    ->visible(fn () => auth()->user()?->isSuperAdmin() ?? false)
+                    ->action(function ($records) {
+                        $records->each(function ($record) {
+                            if ($record->status === AdminEpisodeLog::STATUS_PENDING) {
+                                $record->update(['status' => AdminEpisodeLog::STATUS_APPROVED]);
+                            }
+                        });
+                    }),
                 Tables\Actions\BulkAction::make('markPaid')
                     ->label('Tandai Dibayar')
                     ->icon('heroicon-o-currency-dollar')

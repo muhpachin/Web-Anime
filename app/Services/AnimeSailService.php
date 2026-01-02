@@ -225,6 +225,89 @@ class AnimeSailService
             return [];
         }
     }
+
+    /**
+     * Ambil video servers dari halaman episode (HTTP fetch)
+     */
+    public function getEpisodeServers($episodeUrl)
+    {
+        try {
+            $response = $this->http()->get($episodeUrl);
+
+            if (!$response->successful()) {
+                return [];
+            }
+
+            $crawler = new Crawler($response->body());
+            $servers = [];
+            $scheme = parse_url($episodeUrl, PHP_URL_SCHEME) ?: 'https';
+            $host = parse_url($episodeUrl, PHP_URL_HOST);
+            $base = ($scheme && $host) ? ($scheme . '://' . $host) : rtrim($this->baseUrl, '/');
+
+            // Cari iframe player
+            $crawler->filter('iframe')->each(function (Crawler $node) use (&$servers, $base) {
+                try {
+                    $src = $node->attr('src') ?? $node->attr('data-src');
+                    if ($src && strpos($src, '//') === 0) {
+                        $src = 'https:' . $src;
+                    } elseif ($src && !preg_match('/^https?:/i', $src)) {
+                        $src = rtrim($base, '/') . '/' . ltrim($src, '/');
+                    }
+
+                    if ($this->isValidVideoUrl($src)) {
+                        $serverName = $this->getServerName($src);
+                        $servers[] = [
+                            'name' => $serverName,
+                            'url' => $src,
+                            'type' => 'iframe',
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // skip invalid iframe
+                }
+            });
+
+            // Cari link video di konten
+            $crawler->filter('.entry-content a, .server-list a, a')->each(function (Crawler $node) use (&$servers, $base) {
+                try {
+                    $href = $node->attr('href');
+                    $text = $node->text();
+                    if ($href && strpos($href, '//') === 0) {
+                        $href = 'https:' . $href;
+                    } elseif ($href && !preg_match('/^https?:/i', $href)) {
+                        $href = rtrim($base, '/') . '/' . ltrim($href, '/');
+                    }
+
+                    if ($this->isValidVideoUrl($href)) {
+                        $serverName = !empty($text) ? trim($text) : $this->getServerName($href);
+
+                        $exists = false;
+                        foreach ($servers as $server) {
+                            if ($server['url'] === $href) {
+                                $exists = true;
+                                break;
+                            }
+                        }
+
+                        if (!$exists) {
+                            $servers[] = [
+                                'name' => $serverName,
+                                'url' => $href,
+                                'type' => 'link',
+                            ];
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // skip invalid link
+                }
+            });
+
+            return $servers;
+        } catch (\Exception $e) {
+            \Log::error("AnimeSail episode servers failed: " . $e->getMessage());
+            return [];
+        }
+    }
     
     protected function extractServersFromBase64($encoded, $base, &$servers, $label = null) {
         if (empty($encoded)) return;

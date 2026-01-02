@@ -12,6 +12,7 @@ use Filament\Resources\Table;
 use Filament\Tables;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage; // <--- PENTING: Import Library Storage
+use App\Models\VideoServer;
 
 class EpisodeResource extends Resource
 {
@@ -63,6 +64,70 @@ class EpisodeResource extends Resource
             ->defaultSort('episode_number', 'asc')
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('upload_local')
+                    ->label('Upload Video Lokal')
+                    ->icon('heroicon-o-upload')
+                    ->color('primary')
+                    ->form([
+                        Forms\Components\TextInput::make('server_name')
+                            ->label('Nama Server')
+                            ->default('Lokal 720p')
+                            ->required(),
+                        Forms\Components\FileUpload::make('video_file')
+                            ->label('File Video (MP4)')
+                            ->required()
+                            ->directory('videos/episodes')
+                            ->disk('public')
+                            ->acceptedFileTypes(['video/mp4'])
+                            ->helperText('File disimpan di storage publik dan langsung dibuatkan server lokal.'),
+                    ])
+                    ->action(function (Episode $record, array $data) {
+                        if (empty($data['video_file'])) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Upload gagal')
+                                ->danger()
+                                ->body('File video wajib diisi.')
+                                ->send();
+                            return;
+                        }
+
+                        $serverName = $data['server_name'] ?? 'Lokal 720p';
+                        $path = $data['video_file'];
+                        $url = Storage::disk('public')->url($path);
+
+                        $vs = VideoServer::updateOrCreate(
+                            [
+                                'episode_id' => $record->id,
+                                'server_name' => $serverName,
+                            ],
+                            [
+                                'embed_url' => $url,
+                                'is_active' => true,
+                            ]
+                        );
+
+                        // Admin log when a local upload happens
+                        $user = auth()->user();
+                        if ($user && $user->isAdmin()) {
+                            \App\Models\AdminEpisodeLog::updateOrCreate(
+                                [
+                                    'user_id' => $user->id,
+                                    'episode_id' => $record->id,
+                                ],
+                                [
+                                    'amount' => \App\Models\AdminEpisodeLog::DEFAULT_AMOUNT,
+                                    'status' => \App\Models\AdminEpisodeLog::STATUS_PENDING,
+                                    'note' => 'Upload video lokal (' . $serverName . ')',
+                                ]
+                            );
+                        }
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Upload berhasil')
+                            ->success()
+                            ->body('Server lokal ditambahkan: ' . $serverName)
+                            ->send();
+                    }),
                 Tables\Actions\Action::make('sync_servers')
                     ->label('Sync Servers')
                     ->icon('heroicon-o-link')

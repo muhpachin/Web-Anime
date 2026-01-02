@@ -27,9 +27,114 @@ class AnimeSailService
             ->timeout(10)->retry(1, 100);
     }
 
-    public function searchAnime($query) { /* ... (Logika search biarkan sama) ... */ return []; }
-    public function getAnimeDetails($animeUrl) { /* ... (Logika details biarkan sama) ... */ return null; }
-    public function getAnimeDetailsFromHtml(?string $animeUrl, string $html): array { /* ... (Logika extract episode biarkan sama) ... */ return []; }
+    /**
+     * Search anime pada AnimeSail (HTML fetch)
+     */
+    public function searchAnime($query)
+    {
+        try {
+            $searchUrl = rtrim($this->baseUrl, '/') . '/?s=' . urlencode($query);
+            $response = $this->http()->get($searchUrl);
+
+            if (!$response->successful()) {
+                return [];
+            }
+
+            $crawler = new Crawler($response->body());
+            $results = [];
+
+            $crawler->filter('.post-item, .post, .search-result, .entry-title')->each(function (Crawler $node) use (&$results) {
+                try {
+                    $linkNode = $node->filter('a')->first();
+                    $title = $linkNode->text();
+                    $url = $linkNode->attr('href');
+                    $results[] = [
+                        'title' => trim($title),
+                        'url' => $url,
+                        'slug' => basename(parse_url($url, PHP_URL_PATH)),
+                    ];
+                } catch (\Exception $e) {
+                    // skip invalid entry
+                }
+            });
+
+            return $results;
+        } catch (\Exception $e) {
+            \Log::error("AnimeSail search failed: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Ambil detail anime langsung dari URL
+     */
+    public function getAnimeDetails($animeUrl)
+    {
+        try {
+            $response = $this->http()->get($animeUrl);
+            if (!$response->successful()) {
+                return null;
+            }
+
+            return $this->parseEpisodeList($response->body(), $animeUrl);
+        } catch (\Exception $e) {
+            \Log::error("AnimeSail anime details failed: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Parse episode list dari HTML upload (tanpa request jaringan)
+     */
+    public function getAnimeDetailsFromHtml(?string $animeUrl, string $html): array
+    {
+        try {
+            return $this->parseEpisodeList($html, $animeUrl);
+        } catch (\Exception $e) {
+            return ['episodes' => []];
+        }
+    }
+
+    /**
+     * Parser reusable untuk daftar episode
+     */
+    protected function parseEpisodeList(string $html, ?string $baseUrl = null): array
+    {
+        $crawler = new Crawler($html);
+        $episodes = [];
+
+        $scheme = $baseUrl ? (parse_url($baseUrl, PHP_URL_SCHEME) ?: 'https') : 'https';
+        $host = $baseUrl ? parse_url($baseUrl, PHP_URL_HOST) : parse_url($this->baseUrl, PHP_URL_HOST);
+        $base = ($scheme && $host) ? ($scheme . '://' . $host) : rtrim($this->baseUrl, '/');
+
+        $crawler->filter('.episode-list a, .episodelist a, .entry-content a, .eplister a, .episodes a, ul li a')->each(function (Crawler $node) use (&$episodes, $base) {
+            try {
+                $text = $node->text();
+                $href = $node->attr('href');
+
+                if ($href && strpos($href, '//') === 0) {
+                    $href = 'https:' . $href;
+                } elseif ($href && !preg_match('/^https?:/i', $href)) {
+                    $href = rtrim($base, '/') . '/' . ltrim($href, '/');
+                }
+
+                if (preg_match('/episode|ep\s*\d+/i', $text)) {
+                    $episodeNumber = $this->extractEpisodeNumber($text);
+                    if ($episodeNumber) {
+                        $episodes[] = [
+                            'number' => $episodeNumber,
+                            'title' => trim($text),
+                            'url' => $href,
+                        ];
+                    }
+                }
+            } catch (\Exception $e) {
+                // skip invalid entry
+            }
+        });
+
+        return ['episodes' => $episodes];
+    }
 
     // === BAGIAN UTAMA YANG DIPERBAIKI (Sync dari HTML Upload) ===
 

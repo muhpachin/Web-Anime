@@ -261,16 +261,16 @@
                         </form>
                     </div>
                 @else
-                    @php
-                        $loginUrl = \Illuminate\Support\Facades\Route::has('auth.login')
-                            ? route('auth.login')
-                            : (\Illuminate\Support\Facades\Route::has('filament.auth.login')
-                                ? route('filament.auth.login')
-                                : url('/admin/login'));
-                    @endphp
                     <div class="mb-8 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-2xl p-6">
                         <p class="text-yellow-400 font-semibold text-center">
-                            <a href="{{ $loginUrl }}" class="underline hover:text-yellow-300 transition">Login</a> untuk memberikan komentar
+                            @if(Route::has('auth.login'))
+                                <a href="{{ route('auth.login') }}" class="underline hover:text-yellow-300 transition">Login</a>
+                            @elseif(Route::has('filament.auth.login'))
+                                <a href="{{ route('filament.auth.login') }}" class="underline hover:text-yellow-300 transition">Login</a>
+                            @else
+                                <a href="{{ url('/admin/login') }}" class="underline hover:text-yellow-300 transition">Login</a>
+                            @endif
+                            untuk memberikan komentar
                         </p>
                     </div>
                 @endauth

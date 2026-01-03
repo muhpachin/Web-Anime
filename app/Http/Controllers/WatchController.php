@@ -48,17 +48,24 @@ class WatchController extends Controller
             ->orderBy('episode_number', 'asc')
             ->get();
 
-        // Gunakan urutan yang sama dengan daftar episode untuk prev/next agar konsisten
-        $orderedEpisodes = $episode->anime->episodes()
-            ->orderBy('episode_number', 'asc')
-            ->get(['id', 'slug', 'episode_number']);
+        // Pakai urutan yang sama dengan daftar episode (aktif server) untuk prev/next
+        $navEpisodes = $animeEpisodes->values();
+        $currentIndex = $navEpisodes->search(fn ($ep) => $ep->id === $episode->id);
 
-        $currentIndex = $orderedEpisodes->search(fn ($ep) => $ep->id === $episode->id);
-        $prevEpisode = $currentIndex !== false && $currentIndex > 0
-            ? $orderedEpisodes[$currentIndex - 1]
+        // Jika episode sekarang tidak punya server aktif (edge case), fallback ke full daftar
+        if ($currentIndex === false) {
+            $navEpisodes = $episode->anime->episodes()
+                ->orderBy('episode_number', 'asc')
+                ->get(['id', 'slug', 'episode_number'])
+                ->values();
+            $currentIndex = $navEpisodes->search(fn ($ep) => $ep->id === $episode->id);
+        }
+
+        $prevEpisode = ($currentIndex !== false && $currentIndex > 0)
+            ? $navEpisodes[$currentIndex - 1]
             : null;
-        $nextEpisode = $currentIndex !== false && $currentIndex < $orderedEpisodes->count() - 1
-            ? $orderedEpisodes[$currentIndex + 1]
+        $nextEpisode = ($currentIndex !== false && $currentIndex < $navEpisodes->count() - 1)
+            ? $navEpisodes[$currentIndex + 1]
             : null;
 
         $prevEpisodeUrl = $prevEpisode ? route('watch', ['episode' => $prevEpisode->slug]) : null;

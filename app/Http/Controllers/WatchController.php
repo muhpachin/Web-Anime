@@ -54,28 +54,27 @@ class WatchController extends Controller
             ->get(['id', 'slug', 'episode_number']);
 
         // Prefer playable prev/next; fallback to sequential even if no server
-        $prevPlayable = $animeEpisodes
-            ->where('episode_number', '<', $episode->episode_number)
-            ->sortByDesc('episode_number')
-            ->first();
-
-        $nextPlayable = $animeEpisodes
+       // 1. Cari Episode Selanjutnya (Next)
+        // Ambil episode milik anime ini yang nomornya LEBIH BESAR dari yang sekarang
+        $nextEpisodeData = Episode::where('anime_id', $episode->anime_id)
             ->where('episode_number', '>', $episode->episode_number)
-            ->sortBy('episode_number')
-            ->first();
+            ->orderBy('episode_number', 'asc') // Urutkan 1, 2, 3... ambil yang paling dekat
+            ->first(['id', 'slug', 'episode_number']);
 
-        $prevEpisode = $prevPlayable ?: $allEpisodes
+        // 2. Cari Episode Sebelumnya (Prev)
+        // Ambil episode milik anime ini yang nomornya LEBIH KECIL dari yang sekarang
+        $prevEpisodeData = Episode::where('anime_id', $episode->anime_id)
             ->where('episode_number', '<', $episode->episode_number)
-            ->sortByDesc('episode_number')
-            ->first();
+            ->orderBy('episode_number', 'desc') // Urutkan 3, 2, 1... ambil yang paling dekat
+            ->first(['id', 'slug', 'episode_number']);
 
-        $nextEpisode = $nextPlayable ?: $allEpisodes
-            ->where('episode_number', '>', $episode->episode_number)
-            ->sortBy('episode_number')
-            ->first();
+        // 3. GENERATE URL (PENTING: Pakai Slug biar gak 404)
+        $nextEpisodeUrl = $nextEpisodeData ? route('watch', ['episode' => $nextEpisodeData->slug]) : null;
+        $prevEpisodeUrl = $prevEpisodeData ? route('watch', ['episode' => $prevEpisodeData->slug]) : null;
 
-        $prevEpisodeUrl = $prevEpisode ? route('watch', $prevEpisode) : null;
-        $nextEpisodeUrl = $nextEpisode ? route('watch', $nextEpisode) : null;
+        // Kita set variabel agar sama dengan view
+        $prevEpisode = $prevEpisodeData;
+        $nextEpisode = $nextEpisodeData;
 
         // Load comments for this episode (parent only, with replies)
         $comments = Comment::where('anime_id', $episode->anime_id)

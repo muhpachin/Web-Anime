@@ -7,6 +7,7 @@ use App\Http\Controllers\WatchController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoProxyController;
 use App\Http\Controllers\VideoSourceController;
+use App\Http\Controllers\PlayerProxyController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CommentController;
@@ -45,6 +46,9 @@ Route::get('/api/video/proxy/external', [VideoProxyController::class, 'proxyExte
 
 // Video Source API (Protected)
 Route::post('/api/video/source', [VideoSourceController::class, 'getSource'])->name('video.source');
+
+// Player proxy page (hide external URL in parent HTML)
+Route::get('/player/{token}', [PlayerProxyController::class, 'show'])->name('player.proxy');
 
 
 // Auth Routes

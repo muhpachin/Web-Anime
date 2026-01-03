@@ -48,13 +48,28 @@ class WatchController extends Controller
             ->orderBy('episode_number', 'asc')
             ->get();
 
-        // Calculate prev/next navigation using only episodes that are playable (have active servers)
-        $prevEpisode = $animeEpisodes
+        // Full list (including ones without active server) to keep navigation consistent
+        $allEpisodes = $episode->anime->episodes()
+            ->orderBy('episode_number', 'asc')
+            ->get(['id', 'slug', 'episode_number']);
+
+        // Prefer playable prev/next; fallback to sequential even if no server
+        $prevPlayable = $animeEpisodes
             ->where('episode_number', '<', $episode->episode_number)
             ->sortByDesc('episode_number')
             ->first();
 
-        $nextEpisode = $animeEpisodes
+        $nextPlayable = $animeEpisodes
+            ->where('episode_number', '>', $episode->episode_number)
+            ->sortBy('episode_number')
+            ->first();
+
+        $prevEpisode = $prevPlayable ?: $allEpisodes
+            ->where('episode_number', '<', $episode->episode_number)
+            ->sortByDesc('episode_number')
+            ->first();
+
+        $nextEpisode = $nextPlayable ?: $allEpisodes
             ->where('episode_number', '>', $episode->episode_number)
             ->sortBy('episode_number')
             ->first();

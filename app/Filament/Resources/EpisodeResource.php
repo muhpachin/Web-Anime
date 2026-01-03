@@ -24,25 +24,82 @@ class EpisodeResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('episode_number')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('title')
-                    ->required()
-                    ->maxLength(255)
-                    ->reactive()
-                    ->afterStateUpdated(fn (callable $set, $state) => $set('slug', Str::slug($state))),
-                Forms\Components\TextInput::make('slug')
-                    ->required()
-                    ->maxLength(255)
-                    ->helperText('Auto-generated dari title'),
-                Forms\Components\Textarea::make('description'),
-                Forms\Components\Select::make('anime_id')
-                    ->relationship('anime', 'title')
-                    ->searchable()
-                    ->preload()
-                    ->placeholder('Cari & pilih anime')
-                    ->required(),
+                // --- BAGIAN 1: DATA EPISODE (Sama seperti sebelumnya) ---
+                Forms\Components\Card::make()
+                    ->schema([
+                        Forms\Components\TextInput::make('episode_number')
+                            ->required()
+                            ->numeric()
+                            ->label('Nomor Episode'),
+                        Forms\Components\TextInput::make('title')
+                            ->required()
+                            ->maxLength(255)
+                            ->reactive()
+                            ->afterStateUpdated(fn (callable $set, $state) => $set('slug', Str::slug($state)))
+                            ->label('Judul Episode'),
+                        Forms\Components\TextInput::make('slug')
+                            ->required()
+                            ->maxLength(255)
+                            ->helperText('Auto-generated dari judul'),
+                        Forms\Components\Textarea::make('description')
+                            ->label('Deskripsi'),
+                        Forms\Components\Select::make('anime_id')
+                            ->relationship('anime', 'title')
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('Cari & pilih anime')
+                            ->required(),
+                    ]),
+
+                // --- BAGIAN 2: VIDEO SERVERS MANAGER (INI YANG BARU) ---
+                Forms\Components\Section::make('Video Servers (Manual & Upload)')
+                    ->description('Kelola link video manual atau paste nama file dari FileBrowser.')
+                    ->schema([
+                        Forms\Components\Repeater::make('videoServers')
+                            ->relationship()
+                            ->schema([
+                                Forms\Components\TextInput::make('server_name')
+                                    ->label('Nama Server')
+                                    ->default('Server Admin')
+                                    ->required(),
+
+                                // KOLOM PINTAR: Paste Nama File Disini
+                                Forms\Components\TextInput::make('manual_filename')
+                                    ->label('Paste Nama File Video')
+                                    ->placeholder('Contoh: naruto-ep1.mp4')
+                                    ->helperText('Ambil nama file dari FileBrowser (Port :8081).')
+                                    ->dehydrated(false) // Tidak disimpan ke database, cuma alat bantu
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        // LOGIC OTOMATIS: Ubah nama file jadi URL
+                                        if ($state) {
+                                            // Asumsi file ada di folder 'videos/episodes/'
+                                            $url = Storage::disk('public')->url('videos/episodes/' . $state);
+                                            $set('embed_url', $url);
+                                        }
+                                    })
+                                    // TOMBOL PINTAS KE FILEBROWSER
+                                    ->suffixAction(
+                                        Forms\Components\Actions\Action::make('open_filebrowser')
+                                            ->icon('heroicon-o-external-link')
+                                            ->url('http://192.168.100.13:8082', true) // Ganti IP jika beda
+                                            ->tooltip('Buka FileBrowser Upload Center')
+                                    ),
+
+                                Forms\Components\TextInput::make('embed_url')
+                                    ->label('URL Video Final')
+                                    ->required()
+                                    ->columnSpan('full')
+                                    ->helperText('Terisi otomatis jika mengisi nama file di atas.'),
+                                
+                                Forms\Components\Toggle::make('is_active')
+                                    ->label('Aktif')
+                                    ->default(true),
+                            ])
+                            ->createItemButtonLabel('Tambah Server Manual')
+                            ->defaultItems(0)
+                            ->columns(2)
+                    ])
             ]);
     }
 

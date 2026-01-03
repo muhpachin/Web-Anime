@@ -39,7 +39,12 @@ class WatchController extends Controller
 
         // Load only episodes of this anime that have video servers
         $animeEpisodes = $episode->anime->episodes()
-            ->whereHas('videoServers')
+            ->whereHas('videoServers', function ($q) {
+                $q->where('is_active', true);
+            })
+            ->with(['videoServers' => function ($q) {
+                $q->where('is_active', true)->orderBy('created_at', 'desc');
+            }])
             ->orderBy('episode_number', 'asc')
             ->get();
 

@@ -184,7 +184,11 @@
                 <div class="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                     @foreach($animeEpisodes as $ep)
                         @php
-                            $minutesSinceAdded = $ep->created_at ? now()->diffInMinutes($ep->created_at) : null;
+                            // Pakai waktu server aktif terbaru sebagai referensi, fallback ke created_at episode
+                            $latestServerAddedAt = $ep->videoServers->max('created_at');
+                            $referenceTime = $latestServerAddedAt ?: $ep->created_at;
+
+                            $minutesSinceAdded = $referenceTime ? now()->diffInMinutes($referenceTime) : null;
                             $isNew = $minutesSinceAdded !== null && $minutesSinceAdded <= (72 * 60); // mark new if within 72 hours
 
                             if (is_null($minutesSinceAdded)) {

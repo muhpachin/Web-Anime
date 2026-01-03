@@ -24,7 +24,7 @@ class EpisodeResource extends Resource
     {
         return $form
             ->schema([
-                // --- BAGIAN 1: DATA EPISODE (Sama seperti sebelumnya) ---
+                // --- BAGIAN 1: DATA EPISODE (DATA LAMA) ---
                 Forms\Components\Card::make()
                     ->schema([
                         Forms\Components\TextInput::make('episode_number')
@@ -40,7 +40,7 @@ class EpisodeResource extends Resource
                         Forms\Components\TextInput::make('slug')
                             ->required()
                             ->maxLength(255)
-                            ->helperText('Auto-generated dari judul'),
+                            ->helperText('Auto-generated dari title'),
                         Forms\Components\Textarea::make('description')
                             ->label('Deskripsi'),
                         Forms\Components\Select::make('anime_id')
@@ -51,9 +51,9 @@ class EpisodeResource extends Resource
                             ->required(),
                     ]),
 
-                // --- BAGIAN 2: VIDEO SERVERS MANAGER (INI YANG BARU) ---
+                // --- BAGIAN 2: VIDEO SERVERS MANAGER (FITUR BARU UNTUK ADMIN) ---
                 Forms\Components\Section::make('Video Servers (Manual & Upload)')
-                    ->description('Kelola link video manual atau paste nama file dari FileBrowser.')
+                    ->description('Kelola link video manual atau paste nama file dari FileBrowser (Upload Center).')
                     ->schema([
                         Forms\Components\Repeater::make('videoServers')
                             ->relationship()
@@ -74,6 +74,7 @@ class EpisodeResource extends Resource
                                         // LOGIC OTOMATIS: Ubah nama file jadi URL
                                         if ($state) {
                                             // Asumsi file ada di folder 'videos/episodes/'
+                                            // Pastikan admin upload ke folder 'videos/episodes' di FileBrowser
                                             $url = Storage::disk('public')->url('videos/episodes/' . $state);
                                             $set('embed_url', $url);
                                         }
@@ -82,7 +83,7 @@ class EpisodeResource extends Resource
                                     ->suffixAction(
                                         Forms\Components\Actions\Action::make('open_filebrowser')
                                             ->icon('heroicon-o-external-link')
-                                            ->url('http://192.168.100.13:8082', true) // Ganti IP jika beda
+                                            ->url('http://192.168.100.13:8081', true) // IP FileBrowser
                                             ->tooltip('Buka FileBrowser Upload Center')
                                     ),
 
@@ -121,6 +122,8 @@ class EpisodeResource extends Resource
             ->defaultSort('episode_number', 'asc')
             ->actions([
                 Tables\Actions\EditAction::make(),
+                
+                // ACTION UPLOAD LOKAL (JANGAN DIUBAH - SUDAH WORK)
                 Tables\Actions\Action::make('upload_local')
                     ->label('Upload Video Lokal')
                     ->icon('heroicon-o-upload')
@@ -203,6 +206,8 @@ class EpisodeResource extends Resource
                             ->body('Server ditambahkan: ' . ($created + $updated) . ' entri')
                             ->send();
                     }),
+                
+                // ACTION SYNC SERVERS (JANGAN DIUBAH - SUDAH WORK)
                 Tables\Actions\Action::make('sync_servers')
                     ->label('Sync Servers')
                     ->icon('heroicon-o-link')
@@ -315,6 +320,9 @@ class EpisodeResource extends Resource
                     })
             ])
             ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
+                
+                // BULK UPLOAD LOCAL (JANGAN DIUBAH)
                 Tables\Actions\BulkAction::make('bulk_upload_local')
                     ->label('Bulk Upload Video Lokal')
                     ->icon('heroicon-o-upload')
@@ -419,7 +427,8 @@ class EpisodeResource extends Resource
                             ->body($body)
                             ->send();
                     }),
-                Tables\Actions\DeleteBulkAction::make(),
+
+                // BULK SYNC SERVERS (JANGAN DIUBAH - SUDAH WORK)
                 Tables\Actions\BulkAction::make('bulk_sync_servers')
                     ->label('Bulk Sync Servers')
                     ->icon('heroicon-o-refresh')
@@ -559,9 +568,6 @@ class EpisodeResource extends Resource
                                 Storage::disk('public')->delete($file);
                             }
                         }
-                        
-                        // Bersihkan folder jika kosong (opsional, agar folder rapi)
-                        // Storage::disk('public')->deleteDirectory('uploads/bulk-html');
 
                         $message = "Processed: {$processedEpisodes} | Created: {$totalCreated} | Updated: {$totalUpdated}";
                         if ($skippedEpisodes > 0) {

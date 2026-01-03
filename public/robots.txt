@@ -1,2 +1,11 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Blok area non-publik
+Disallow: /admin
+Disallow: /auth
+Disallow: /filament
+Disallow: /storage
+Disallow: /build
+
+Sitemap: https://nipnime.my.id/sitemap.xml

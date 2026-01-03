@@ -37,7 +37,7 @@ class WatchController extends Controller
             );
         }
 
-        // Load only episodes of this anime that have video servers
+        // Load only episodes of this anime that have active video servers
         $animeEpisodes = $episode->anime->episodes()
             ->whereHas('videoServers', function ($q) {
                 $q->where('is_active', true);
@@ -47,6 +47,17 @@ class WatchController extends Controller
             }])
             ->orderBy('episode_number', 'asc')
             ->get();
+
+        // Determine previous/next episodes within the same anime that still have active servers
+        $prevEpisode = $animeEpisodes
+            ->where('episode_number', '<', $episode->episode_number)
+            ->sortByDesc('episode_number')
+            ->first();
+
+        $nextEpisode = $animeEpisodes
+            ->where('episode_number', '>', $episode->episode_number)
+            ->sortBy('episode_number')
+            ->first();
 
         // Load comments for this episode (parent only, with replies)
         $comments = Comment::where('anime_id', $episode->anime_id)
@@ -60,6 +71,8 @@ class WatchController extends Controller
             'episode' => $episode,
             'animeEpisodes' => $animeEpisodes,
             'comments' => $comments,
+            'prevEpisode' => $prevEpisode,
+            'nextEpisode' => $nextEpisode,
         ]);
     }
 

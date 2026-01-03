@@ -5,7 +5,7 @@
     $poster = $episode->anime->poster_image ? asset('storage/' . $episode->anime->poster_image) : asset('images/placeholder.png');
 @endphp
 @section('meta_description', $episodeDescription)
-@section('canonical', route('watch', $episode))
+@section('canonical', route('watch', ['episode' => $episode->slug]))
 @section('og_type', 'video.episode')
 @section('og_image', $poster)
 @push('structured-data')
@@ -19,13 +19,13 @@
     'partOfSeries' => [
         '@type' => 'TVSeries',
         'name' => $episode->anime->title,
-        'url' => route('detail', $episode->anime),
+        'url' => route('detail', ['anime' => $episode->anime->slug]),
     ],
-    'url' => route('watch', $episode),
+    'url' => route('watch', ['episode' => $episode->slug]),
     'image' => $poster,
     'potentialAction' => [
         '@type' => 'WatchAction',
-        'target' => route('watch', $episode),
+        'target' => route('watch', ['episode' => $episode->slug]),
     ],
 ], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) !!}
 </script>
@@ -46,8 +46,25 @@
                         {{ $episode->anime->title }} <span class="text-red-600">- Ep {{ $episode->episode_number }}</span>
                     </h1>
                     <div class="flex gap-2">
-                        <button class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border hover:bg-white/10 text-xs font-bold rounded-lg transition uppercase tracking-wide">PREV</button>
-                        <button class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border hover:bg-white/10 text-xs font-bold rounded-lg transition uppercase tracking-wide">NEXT</button>
+                        @if($prevEpisode)
+                            <a href="{{ route('watch', ['episode' => $prevEpisode->slug]) }}" class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border hover:bg-white/10 text-xs font-bold rounded-lg transition uppercase tracking-wide text-center">
+                                PREV
+                            </a>
+                        @else
+                            <span class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border text-xs font-bold rounded-lg uppercase tracking-wide opacity-50 cursor-not-allowed text-center">
+                                PREV
+                            </span>
+                        @endif
+
+                        @if($nextEpisode)
+                            <a href="{{ route('watch', ['episode' => $nextEpisode->slug]) }}" class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border hover:bg-white/10 text-xs font-bold rounded-lg transition uppercase tracking-wide text-center">
+                                NEXT
+                            </a>
+                        @else
+                            <span class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border text-xs font-bold rounded-lg uppercase tracking-wide opacity-50 cursor-not-allowed text-center">
+                                NEXT
+                            </span>
+                        @endif
                     </div>
                 </div>
                 <p class="text-gray-400 leading-relaxed italic border-l-4 border-red-600 pl-4 text-sm sm:text-base">{{ $episode->description }}</p>

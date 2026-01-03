@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoProxyController;
 use App\Http\Controllers\VideoSourceController;
 use App\Http\Controllers\PlayerProxyController;
+use App\Http\Controllers\StreamProxyController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CommentController;
@@ -49,6 +50,9 @@ Route::post('/api/video/source', [VideoSourceController::class, 'getSource'])->n
 
 // Player proxy page (hide external URL in parent HTML)
 Route::get('/player/{token}', [PlayerProxyController::class, 'show'])->name('player.proxy');
+
+// Stream proxy (short-lived signed redirect)
+Route::get('/stream/{token}', [StreamProxyController::class, 'redirect'])->name('stream.proxy')->middleware('signed');
 
 
 // Auth Routes

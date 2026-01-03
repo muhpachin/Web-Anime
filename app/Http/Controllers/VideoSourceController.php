@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\VideoServer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\URL;
 
 class VideoSourceController extends Controller
 {
@@ -28,12 +29,33 @@ class VideoSourceController extends Controller
             
             $embedUrl = $videoServer->embed_url;
             $type = $this->getVideoType($embedUrl);
+
+            // Generate short-lived signed URL that maps to internal stream proxy
+            $signedUrl = URL::temporarySignedRoute(
+                'stream.proxy',
+                now()->addMinutes(5),
+                ['token' => Crypt::encryptString($videoServer->id)]
+            );
             
-            // Return URL without proxification to ensure playback works
+            // For iframe/embed, we still return the proxied player page
+            if ($type === 'html' || $type === 'url') {
+                $playerUrl = URL::temporarySignedRoute(
+                    'player.proxy',
+                    now()->addMinutes(5),
+                    ['token' => Crypt::encryptString($videoServer->id)]
+                );
+                return response()->json([
+                    'url' => $playerUrl,
+                    'type' => 'iframe',
+                    'proxied' => true,
+                ]);
+            }
+
             return response()->json([
-                'url' => $embedUrl,
+                'url' => $signedUrl,
                 'type' => $type,
-                'proxied' => false
+                'proxied' => true,
+                'expires_in' => 300,
             ]);
             
         } catch (\Exception $e) {

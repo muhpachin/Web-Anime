@@ -6,6 +6,7 @@ use App\Http\Controllers\DetailController;
 use App\Http\Controllers\WatchController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoProxyController;
+use App\Http\Controllers\VideoSourceController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CommentController;
@@ -41,6 +42,9 @@ Route::post('/contact', [PageController::class, 'sendContact'])->name('contact.s
 // Video Proxy Routes
 Route::get('/api/video/proxy/animesail/{playerType}', [VideoProxyController::class, 'proxyAnimeSail'])->name('video.proxy.animesail');
 Route::get('/api/video/proxy/external', [VideoProxyController::class, 'proxyExternal'])->name('video.proxy.external');
+
+// Video Source API (Protected)
+Route::post('/api/video/source', [VideoSourceController::class, 'getSource'])->name('video.source');
 
 
 // Auth Routes

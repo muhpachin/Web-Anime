@@ -61,7 +61,7 @@
                 {{-- Handle Direct MP4 Links --}}
                 <video 
                     id="video-player-{{ $selectedServer->id }}"
-                    data-video-id="{{ $selectedServer->id }}"
+                    data-server="{{ Crypt::encryptString($selectedServer->id) }}"
                     class="w-full h-full object-contain" 
                     controls 
                     autoplay
@@ -73,27 +73,32 @@
                         (function() {
                             const video = document.getElementById('video-player-{{ $selectedServer->id }}');
                             if(video) {
-                                // Obfuscated video source
-                                const parts = [
-                                    '{{ substr($embedSource ?? $rawEmbed, 0, 20) }}',
-                                    '{{ substr($embedSource ?? $rawEmbed, 20, 30) }}',
-                                    '{{ substr($embedSource ?? $rawEmbed, 50) }}'
-                                ];
-                                const videoUrl = parts.join('');
+                                const serverId = video.dataset.server;
                                 
-                                // Load video via blob to hide source
-                                fetch(videoUrl)
-                                    .then(response => response.blob())
-                                    .then(blob => {
-                                        const blobUrl = URL.createObjectURL(blob);
-                                        video.src = blobUrl;
-                                    })
-                                    .catch(() => {
-                                        // Fallback if blob fails
-                                        video.src = videoUrl;
-                                    });
+                                // Fetch video URL from API
+                                fetch('{{ route('video.source') }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    },
+                                    body: JSON.stringify({ server: serverId })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if(data.url) {
+                                        // Load via blob to hide direct URL
+                                        fetch(data.url)
+                                            .then(r => r.blob())
+                                            .then(blob => {
+                                                video.src = URL.createObjectURL(blob);
+                                            })
+                                            .catch(() => {
+                                                video.src = data.url;
+                                            });
+                                    }
+                                });
                                 
-                                // Prevent inspection
                                 video.addEventListener('contextmenu', e => e.preventDefault());
                             }
                         })();
@@ -104,6 +109,7 @@
                 {{-- Handle HLS Streaming Links --}}
                 <video 
                     id="hls-player-{{ $selectedServer->id }}" 
+                    data-server="{{ Crypt::encryptString($selectedServer->id) }}"
                     class="w-full h-full object-contain" 
                     controls
                     autoplay
@@ -116,41 +122,43 @@
                             const video = document.getElementById('hls-player-{{ $selectedServer->id }}');
                             if (!video) return;
                             
-                            // Obfuscated HLS source
-                            const parts = [
-                                '{{ substr($embedSource ?? $rawEmbed, 0, 20) }}',
-                                '{{ substr($embedSource ?? $rawEmbed, 20, 30) }}',
-                                '{{ substr($embedSource ?? $rawEmbed, 50) }}'
-                            ];
-                            const src = parts.join('');
-                            
-                            // Prevent right click
+                            const serverId = video.dataset.server;
                             video.addEventListener('contextmenu', e => e.preventDefault());
                             
-                            function setup(){
-                                if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                                    video.src = src;
-                                } else if (window.Hls) {
-                                    const hls = new Hls({
-                                        maxBufferLength: 30,
-                                        enableWorker: true,
-                                    });
-                                    hls.loadSource(src);
-                                    hls.attachMedia(video);
+                            // Fetch video URL from API
+                            fetch('{{ route('video.source') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({ server: serverId })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if(data.url) {
+                                    function setup(){
+                                        if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                                            video.src = data.url;
+                                        } else if (window.Hls) {
+                                            const hls = new Hls({
+                                                maxBufferLength: 30,
+                                                enableWorker: true,
+                                            });
+                                            hls.loadSource(data.url);
+                                            hls.attachMedia(video);
+                                        }
+                                    }
+                                    if (!window.Hls) {
+                                        var s=document.createElement('script');
+                                        s.src='https://cdn.jsdelivr.net/npm/hls.js@latest';
+                                        s.onload=setup;
+                                        document.head.appendChild(s);
+                                    } else {
+                                        setup();
+                                    }
                                 }
-                            }
-                            if (!window.Hls) {
-                                var s=document.createElement('script');
-                                s.src='https://cdn.jsdelivr.net/npm/hls.js@latest';
-                                s.onload=setup;
-                                document.head.appendChild(s);
-                            } else {
-                                setup();
-                            }
-                        })();
-                    </script>
-                @endpush
-
+                            });
             @elseif($embedSource && str_contains($rawEmbed, 'http'))
                 {{-- Handle Standard Embed URL (Iframe) --}}
                 <iframe 

@@ -335,40 +335,13 @@
         initFullscreenControls();
     }
     
-    // Protect video source from inspection
-    (function() {
-        // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-        document.addEventListener('keydown', function(e) {
-            if (e.keyCode == 123 || // F12
-                (e.ctrlKey && e.shiftKey && e.keyCode == 73) || // Ctrl+Shift+I
-                (e.ctrlKey && e.shiftKey && e.keyCode == 74) || // Ctrl+Shift+J
-                (e.ctrlKey && e.keyCode == 85)) { // Ctrl+U
-                e.preventDefault();
-                return false;
-            }
-        });
-        
-        // Disable right click on video elements
-        document.addEventListener('contextmenu', function(e) {
-            if (e.target.tagName === 'VIDEO' || e.target.tagName === 'IFRAME') {
-                e.preventDefault();
-                return false;
-            }
-        });
-        
-        // Detect DevTools opening
-        var devtools = /./;
-        devtools.toString = function() {
-            this.opened = true;
+    // Protect video source - disable right click on video only
+    document.addEventListener('contextmenu', function(e) {
+        if (e.target.tagName === 'VIDEO' || e.target.tagName === 'IFRAME') {
+            e.preventDefault();
+            return false;
         }
-        const checkDevTools = setInterval(function() {
-            console.log('%c', devtools);
-            if (devtools.opened) {
-                document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><div style="text-align:center;"><h1>⚠️ Developer Tools Detected</h1><p>Please close developer tools to continue watching.</p></div></div>';
-                devtools.opened = false;
-            }
-        }, 1000);
-    })();
+    });
     </script>
     @endpush
     @endonce

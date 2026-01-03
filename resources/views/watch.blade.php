@@ -184,8 +184,10 @@
                 <div class="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                     @foreach($animeEpisodes as $ep)
                         @php
-                            // Pakai waktu server aktif terbaru sebagai referensi, fallback ke created_at episode
-                            $latestServerAddedAt = $ep->videoServers->max('created_at');
+                            // Pakai timestamp server aktif terbaru (updated_at > created_at) sebagai referensi, fallback ke created_at episode
+                            $latestServerAddedAt = $ep->videoServers->max(function ($server) {
+                                return $server->updated_at ?? $server->created_at;
+                            });
                             $referenceTime = $latestServerAddedAt ?: $ep->created_at;
 
                             $minutesSinceAdded = $referenceTime ? now()->diffInMinutes($referenceTime) : null;

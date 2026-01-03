@@ -43,7 +43,7 @@ class WatchController extends Controller
                 $q->where('is_active', true);
             })
             ->with(['videoServers' => function ($q) {
-                $q->where('is_active', true)->orderBy('created_at', 'desc');
+                $q->where('is_active', true)->orderBy('updated_at', 'desc')->orderBy('created_at', 'desc');
             }])
             ->orderBy('episode_number', 'asc')
             ->get();

@@ -48,20 +48,19 @@ class WatchController extends Controller
             ->orderBy('episode_number', 'asc')
             ->get();
 
-        // Use all episodes (regardless of server availability) to calculate prev/next navigation
-        $allEpisodes = $episode->anime->episodes()
-            ->orderBy('episode_number', 'asc')
-            ->get(['id', 'slug', 'episode_number']);
-
-        $prevEpisode = $allEpisodes
+        // Calculate prev/next navigation using only episodes that are playable (have active servers)
+        $prevEpisode = $animeEpisodes
             ->where('episode_number', '<', $episode->episode_number)
             ->sortByDesc('episode_number')
             ->first();
 
-        $nextEpisode = $allEpisodes
+        $nextEpisode = $animeEpisodes
             ->where('episode_number', '>', $episode->episode_number)
             ->sortBy('episode_number')
             ->first();
+
+        $prevEpisodeUrl = $prevEpisode ? route('watch', $prevEpisode) : null;
+        $nextEpisodeUrl = $nextEpisode ? route('watch', $nextEpisode) : null;
 
         // Load comments for this episode (parent only, with replies)
         $comments = Comment::where('anime_id', $episode->anime_id)
@@ -77,6 +76,8 @@ class WatchController extends Controller
             'comments' => $comments,
             'prevEpisode' => $prevEpisode,
             'nextEpisode' => $nextEpisode,
+            'prevEpisodeUrl' => $prevEpisodeUrl,
+            'nextEpisodeUrl' => $nextEpisodeUrl,
         ]);
     }
 

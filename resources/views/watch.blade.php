@@ -46,22 +46,22 @@
                         {{ $episode->anime->title }} <span class="text-red-600">- Ep {{ $episode->episode_number }}</span>
                     </h1>
                     <div class="flex gap-2">
-                        @if($prevEpisode)
-                            <a href="{{ route('watch', ['episode' => $prevEpisode->slug]) }}" class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border hover:bg-white/10 text-xs font-bold rounded-lg transition uppercase tracking-wide text-center">
+                        @if($prevEpisodeUrl)
+                            <a href="{{ $prevEpisodeUrl }}" class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border hover:bg-white/10 text-xs font-bold rounded-lg transition uppercase tracking-wide text-center" title="Episode {{ $prevEpisode->episode_number ?? '' }}">
                                 PREV
                             </a>
                         @else
-                            <span class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border text-xs font-bold rounded-lg uppercase tracking-wide opacity-50 cursor-not-allowed text-center">
+                            <span class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border text-xs font-bold rounded-lg uppercase tracking-wide opacity-50 cursor-not-allowed text-center" aria-disabled="true">
                                 PREV
                             </span>
                         @endif
 
-                        @if($nextEpisode)
-                            <a href="{{ route('watch', ['episode' => $nextEpisode->slug]) }}" class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border hover:bg-white/10 text-xs font-bold rounded-lg transition uppercase tracking-wide text-center">
+                        @if($nextEpisodeUrl)
+                            <a href="{{ $nextEpisodeUrl }}" class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border hover:bg-white/10 text-xs font-bold rounded-lg transition uppercase tracking-wide text-center" title="Episode {{ $nextEpisode->episode_number ?? '' }}">
                                 NEXT
                             </a>
                         @else
-                            <span class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border text-xs font-bold rounded-lg uppercase tracking-wide opacity-50 cursor-not-allowed text-center">
+                            <span class="flex-1 sm:flex-none px-4 py-2 theme-elevated border theme-border text-xs font-bold rounded-lg uppercase tracking-wide opacity-50 cursor-not-allowed text-center" aria-disabled="true">
                                 NEXT
                             </span>
                         @endif

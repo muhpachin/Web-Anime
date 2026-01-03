@@ -41,7 +41,9 @@
         @if($selectedServer)
             @if($embedSource && str_contains($rawEmbed, '<iframe'))
                 {{-- Handle Full Iframe Tags --}}
-                <div class="w-full h-full relative">
+                <div id="iframe-container-{{ $selectedServer->id }}" 
+                     data-server="{{ Crypt::encryptString($selectedServer->id) }}"
+                     class="w-full h-full relative">
                     <style>
                         .video-wrapper iframe { 
                             width: 100% !important; 
@@ -53,9 +55,35 @@
                         }
                     </style>
                     <div class="video-wrapper w-full h-full">
-                        {!! $embedSource !!}
+                        <!-- Iframe will be loaded via JavaScript -->
                     </div>
                 </div>
+                @push('scripts')
+                    <script>
+                        (function() {
+                            const container = document.getElementById('iframe-container-{{ $selectedServer->id }}');
+                            if(container) {
+                                const serverId = container.dataset.server;
+                                
+                                fetch('{{ route('video.source') }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    },
+                                    body: JSON.stringify({ server: serverId })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if(data.url) {
+                                        const wrapper = container.querySelector('.video-wrapper');
+                                        wrapper.innerHTML = data.url;
+                                    }
+                                });
+                            }
+                        })();
+                    </script>
+                @endpush
 
             @elseif($rawEmbed && str($rawEmbed)->lower()->endsWith('.mp4'))
                 {{-- Handle Direct MP4 Links --}}
@@ -162,12 +190,38 @@
             @elseif($embedSource && str_contains($rawEmbed, 'http'))
                 {{-- Handle Standard Embed URL (Iframe) --}}
                 <iframe 
-                    src="{{ $embedSource }}" 
+                    id="iframe-player-{{ $selectedServer->id }}"
+                    data-server="{{ Crypt::encryptString($selectedServer->id) }}"
                     class="w-full h-full border-none" 
                     allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write" 
                     allowfullscreen
                     referrerpolicy="no-referrer">
                 </iframe>
+                @push('scripts')
+                    <script>
+                        (function() {
+                            const iframe = document.getElementById('iframe-player-{{ $selectedServer->id }}');
+                            if(iframe) {
+                                const serverId = iframe.dataset.server;
+                                
+                                fetch('{{ route('video.source') }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    },
+                                    body: JSON.stringify({ server: serverId })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if(data.url) {
+                                        iframe.src = data.url;
+                                    }
+                                });
+                            }
+                        })();
+                    </script>
+                @endpush
             @else
                 {{-- Handle Error/Invalid URL --}}
                 <div class="w-full h-full flex flex-col items-center justify-center text-gray-500 theme-elevated p-6 border-t border theme-border">

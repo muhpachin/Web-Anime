@@ -48,8 +48,8 @@
                 </div>
                 @else
                 @php
-                    $loginUrl = \Illuminate\Support\Facades\Route::has('login')
-                        ? route('login')
+                    $loginUrl = \Illuminate\Support\Facades\Route::has('auth.login')
+                        ? route('auth.login')
                         : (\Illuminate\Support\Facades\Route::has('filament.auth.login')
                             ? route('filament.auth.login')
                             : url('/admin/login'));

@@ -3,9 +3,41 @@
 @php($rawEmbed = $selectedServer->embed_url ?? null)
 @php($embedSource = $rawEmbed ? \App\Services\VideoEmbedHelper::proxify($rawEmbed) : null)
 <div class="w-full space-y-4">
+    {{-- Anti-theft Protection Styles --}}
+    <style>
+        .fullscreen-container::after {
+            content: '{{ config('app.name', 'NipNime') }}';
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 14px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 9999;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        video::-webkit-media-controls-download-button {
+            display: none !important;
+        }
+        
+        video::-webkit-media-controls-enclosure {
+            overflow: hidden;
+        }
+        
+        video::-internal-media-controls-download-button {
+            display: none !important;
+        }
+    </style>
+    
     {{-- Video Player Container --}}
     <div class="relative group" x-data="{ fullscreen: false }">
-        <div id="{{ $playerContainerId }}" class="theme-elevated rounded-lg overflow-hidden shadow-2xl aspect-video border theme-border fullscreen-container">
+        <div id="{{ $playerContainerId }}" 
+             class="theme-elevated rounded-lg overflow-hidden shadow-2xl aspect-video border theme-border fullscreen-container"
+             oncontextmenu="return false;" 
+             onselectstart="return false;" 
+             ondragstart="return false;">
         @if($selectedServer)
             @if($embedSource && str_contains($rawEmbed, '<iframe'))
                 {{-- Handle Full Iframe Tags --}}
@@ -28,11 +60,28 @@
             @elseif($rawEmbed && str($rawEmbed)->lower()->endsWith('.mp4'))
                 {{-- Handle Direct MP4 Links --}}
                 <video 
-                    src="{{ $embedSource ?? $rawEmbed }}" 
+                    id="video-player-{{ $selectedServer->id }}"
                     class="w-full h-full object-contain" 
                     controls 
-                    autoplay>
+                    autoplay
+                    controlslist="nodownload"
+                    oncontextmenu="return false;">
                 </video>
+                @push('scripts')
+                    <script>
+                        (function() {
+                            const video = document.getElementById('video-player-{{ $selectedServer->id }}');
+                            if(video) {
+                                // Obfuscate source URL
+                                const encodedSrc = '{{ base64_encode($embedSource ?? $rawEmbed) }}';
+                                video.src = atob(encodedSrc);
+                                
+                                // Prevent inspection
+                                video.addEventListener('contextmenu', e => e.preventDefault());
+                            }
+                        })();
+                    </script>
+                @endpush
 
             @elseif($rawEmbed && str($rawEmbed)->lower()->endsWith('.m3u8'))
                 {{-- Handle HLS Streaming Links --}}
@@ -40,14 +89,21 @@
                     id="hls-player-{{ $selectedServer->id }}" 
                     class="w-full h-full object-contain" 
                     controls
-                    autoplay>
+                    autoplay
+                    controlslist="nodownload"
+                    oncontextmenu="return false;">
                 </video>
                 @push('scripts')
                     <script>
                         (function initHlsPlayer(){
                             const video = document.getElementById('hls-player-{{ $selectedServer->id }}');
-                            const src = '{{ $embedSource ?? $rawEmbed }}';
+                            const encodedSrc = '{{ base64_encode($embedSource ?? $rawEmbed) }}';
+                            const src = atob(encodedSrc);
                             if (!video) return;
+                            
+                            // Prevent right click
+                            video.addEventListener('contextmenu', e => e.preventDefault());
+                            
                             function setup(){
                                 if (video.canPlayType('application/vnd.apple.mpegurl')) {
                                     video.src = src;
@@ -278,6 +334,41 @@
     } else {
         initFullscreenControls();
     }
+    
+    // Protect video source from inspection
+    (function() {
+        // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+        document.addEventListener('keydown', function(e) {
+            if (e.keyCode == 123 || // F12
+                (e.ctrlKey && e.shiftKey && e.keyCode == 73) || // Ctrl+Shift+I
+                (e.ctrlKey && e.shiftKey && e.keyCode == 74) || // Ctrl+Shift+J
+                (e.ctrlKey && e.keyCode == 85)) { // Ctrl+U
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Disable right click on video elements
+        document.addEventListener('contextmenu', function(e) {
+            if (e.target.tagName === 'VIDEO' || e.target.tagName === 'IFRAME') {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Detect DevTools opening
+        var devtools = /./;
+        devtools.toString = function() {
+            this.opened = true;
+        }
+        const checkDevTools = setInterval(function() {
+            console.log('%c', devtools);
+            if (devtools.opened) {
+                document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><div style="text-align:center;"><h1>⚠️ Developer Tools Detected</h1><p>Please close developer tools to continue watching.</p></div></div>';
+                devtools.opened = false;
+            }
+        }, 1000);
+    })();
     </script>
     @endpush
     @endonce

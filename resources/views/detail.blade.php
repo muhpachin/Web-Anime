@@ -22,7 +22,7 @@
     'url' => route('detail', $anime),
     'potentialAction' => [
         '@type' => 'WatchAction',
-        'target' => route('watch', optional($anime->episodes->first())),
+        'target' => $anime->episodes->first() ? route('watch', $anime->episodes->first()) : route('detail', $anime),
     ],
 ], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) !!}
 </script>

@@ -4,9 +4,11 @@
 @php
     $detailDescription = \Illuminate\Support\Str::limit(strip_tags($anime->synopsis), 150);
     $poster = $anime->poster_image ? asset('storage/' . $anime->poster_image) : asset('images/placeholder.png');
+    $firstEpisode = $anime->episodes->first();
+    $canonicalUrl = $anime->slug ? route('detail', ['anime' => $anime->slug]) : url()->current();
 @endphp
 @section('meta_description', $detailDescription)
-@section('canonical', route('detail', $anime))
+@section('canonical', $canonicalUrl)
 @section('og_type', 'video.tv_show')
 @section('og_image', $poster)
 @push('structured-data')
@@ -20,13 +22,13 @@ $schemaData = [
     'image' => $poster,
     'genre' => $anime->genres->pluck('name')->values(),
     'numberOfEpisodes' => $anime->episodes->count(),
-    'url' => route('detail', $anime),
+    'url' => $canonicalUrl,
 ];
 
-if ($anime->episodes->first()) {
+if ($firstEpisode) {
     $schemaData['potentialAction'] = [
         '@type' => 'WatchAction',
-        'target' => route('watch', $anime->episodes->first()),
+        'target' => route('watch', ['episode' => $firstEpisode->slug]),
     ];
 }
 @endphp
@@ -52,8 +54,8 @@ if ($anime->episodes->first()) {
                         <img src="{{ $anime->poster_image ? asset('storage/' . $anime->poster_image) : asset('images/placeholder.png') }}" 
                              alt="{{ $anime->title }}"
                              class="w-48 sm:w-64 md:w-full rounded-2xl shadow-2xl shadow-black/50 border-2 border-white/10 hover:border-red-600/50 transition-all bg-gray-800">
-                        @if($anime->episodes->count() > 0)
-                            <a href="{{ route('watch', $anime->episodes->first()) }}" 
+                        @if($firstEpisode)
+                            <a href="{{ route('watch', ['episode' => $firstEpisode->slug]) }}" 
                                class="mt-4 sm:mt-6 w-full flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-red-600/30 uppercase tracking-wide text-sm sm:text-base">
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
                                 Tonton
@@ -142,7 +144,7 @@ if ($anime->episodes->first()) {
                 @if($anime->episodes->count() > 0)
                     <div class="space-y-3">
                         @foreach($anime->episodes as $episode)
-                            <a href="{{ route('watch', $episode) }}" 
+                                     <a href="{{ route('watch', ['episode' => $episode->slug]) }}" 
                                class="group flex items-center p-5 bg-gradient-to-r from-[#1a1d24] to-[#0f1115] border border-white/10 hover:border-red-600/50 rounded-2xl transition-all duration-300 hover:shadow-xl hover:shadow-red-600/20">
                                 <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center font-black text-white mr-5 group-hover:scale-110 transition-transform">
                                     {{ $episode->episode_number }}
@@ -208,7 +210,7 @@ if ($anime->episodes->first()) {
                     <div class="space-y-4">
                         @if($relatedAnimes->count() > 0)
                             @foreach($relatedAnimes as $related)
-                                <a href="{{ route('detail', $related) }}" 
+                                          <a href="{{ route('detail', ['anime' => $related->slug]) }}" 
                                    class="block group">
                                     <div class="relative h-40 bg-[#0f1115] rounded-xl overflow-hidden mb-3 border border-white/10 group-hover:border-red-600/50 transition-all shadow-lg">
                                         <img src="{{ asset('storage/' . $related->poster_image) }}" 

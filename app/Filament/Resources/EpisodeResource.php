@@ -127,7 +127,7 @@ class EpisodeResource extends Resource
                 Tables\Actions\Action::make('upload_local')
                     ->label('Upload Video Lokal')
                     ->icon('heroicon-o-upload')
-                    ->color('primary')
+                    ->color('danger')
                     ->form([
                         Forms\Components\View::make('filament.components.upload-progress')
                             ->viewData(['target' => 'video_files']),
@@ -211,7 +211,7 @@ class EpisodeResource extends Resource
                 Tables\Actions\Action::make('sync_servers')
                     ->label('Sync Servers')
                     ->icon('heroicon-o-link')
-                    ->color('success')
+                    ->color('danger')
                     ->form([
                         Forms\Components\Textarea::make('episode_html')
                             ->label('Episode HTML (opsional)')
@@ -326,7 +326,7 @@ class EpisodeResource extends Resource
                 Tables\Actions\BulkAction::make('bulk_upload_local')
                     ->label('Bulk Upload Video Lokal')
                     ->icon('heroicon-o-upload')
-                    ->color('primary')
+                    ->color('danger')
                     ->requiresConfirmation()
                     ->form([
                         Forms\Components\View::make('filament.components.upload-progress')
@@ -432,7 +432,7 @@ class EpisodeResource extends Resource
                 Tables\Actions\BulkAction::make('bulk_sync_servers')
                     ->label('Bulk Sync Servers')
                     ->icon('heroicon-o-refresh')
-                    ->color('success')
+                    ->color('danger')
                     ->form([
                         Forms\Components\Textarea::make('html_content')
                             ->label('HTML Content (untuk semua episode)')
